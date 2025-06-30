@@ -40,6 +40,7 @@ GameObject:
   - component: {fileID: 33219600129911878}
   - component: {fileID: 23232353880278552}
   - component: {fileID: 114770753783741176}
+  - component: {fileID: 64889938810936062}
   m_Layer: 0
   m_Name: Q4Left
   m_TagString: Untagged
@@ -58,6 +59,7 @@ GameObject:
   - component: {fileID: 33423645352382234}
   - component: {fileID: 23386045922577618}
   - component: {fileID: 114227836721691318}
+  - component: {fileID: 64966475048577580}
   m_Layer: 0
   m_Name: Q4Right
   m_TagString: Untagged
@@ -248,6 +250,7 @@ GameObject:
   - component: {fileID: 114428810385081904}
   - component: {fileID: 114797460587858252}
   - component: {fileID: 114869854774708180}
+  - component: {fileID: 114351514030367552}
   m_Layer: 0
   m_Name: Uncolored Simon
   m_TagString: Untagged
@@ -301,6 +304,7 @@ GameObject:
   - component: {fileID: 33844158030445322}
   - component: {fileID: 23214407281596748}
   - component: {fileID: 114084538032380398}
+  - component: {fileID: 64496732376778836}
   m_Layer: 0
   m_Name: Q4Top
   m_TagString: Untagged
@@ -370,6 +374,7 @@ GameObject:
   - component: {fileID: 33280239357359666}
   - component: {fileID: 23965205194628084}
   - component: {fileID: 114374386948158678}
+  - component: {fileID: 64302120977120086}
   m_Layer: 0
   m_Name: Q1Top
   m_TagString: Untagged
@@ -405,6 +410,7 @@ GameObject:
   - component: {fileID: 33155758102463954}
   - component: {fileID: 23770202540741532}
   - component: {fileID: 114492438491611020}
+  - component: {fileID: 64630430282836444}
   m_Layer: 0
   m_Name: StampLeft
   m_TagString: Untagged
@@ -423,6 +429,7 @@ GameObject:
   - component: {fileID: 33294569515669114}
   - component: {fileID: 23132170730761328}
   - component: {fileID: 114997733399107836}
+  - component: {fileID: 64238245733874984}
   m_Layer: 0
   m_Name: SubmitButton
   m_TagString: Untagged
@@ -441,6 +448,7 @@ GameObject:
   - component: {fileID: 33047987104501224}
   - component: {fileID: 23063089147276050}
   - component: {fileID: 114981652862258438}
+  - component: {fileID: 64324500442896258}
   m_Layer: 0
   m_Name: Q3Left
   m_TagString: Untagged
@@ -476,6 +484,7 @@ GameObject:
   - component: {fileID: 33367334288638146}
   - component: {fileID: 23678077308049570}
   - component: {fileID: 114378482384225658}
+  - component: {fileID: 64957655973614182}
   m_Layer: 0
   m_Name: RotateCW
   m_TagString: Untagged
@@ -599,6 +608,7 @@ GameObject:
   - component: {fileID: 33017516632198918}
   - component: {fileID: 23681334155654546}
   - component: {fileID: 114843657010418348}
+  - component: {fileID: 64257414721131996}
   m_Layer: 0
   m_Name: ResetButton
   m_TagString: Untagged
@@ -617,6 +627,7 @@ GameObject:
   - component: {fileID: 33127738296197016}
   - component: {fileID: 23354922459126442}
   - component: {fileID: 114310148879387924}
+  - component: {fileID: 64958525466925782}
   m_Layer: 0
   m_Name: Q2Right
   m_TagString: Untagged
@@ -635,6 +646,7 @@ GameObject:
   - component: {fileID: 33063522229696174}
   - component: {fileID: 23166583568342556}
   - component: {fileID: 114452053276635126}
+  - component: {fileID: 64937901000992192}
   m_Layer: 0
   m_Name: Q1Right
   m_TagString: Untagged
@@ -653,6 +665,7 @@ GameObject:
   - component: {fileID: 33256433783529996}
   - component: {fileID: 23274102591861908}
   - component: {fileID: 114758100457380914}
+  - component: {fileID: 64238739617843342}
   m_Layer: 0
   m_Name: Q3Down
   m_TagString: Untagged
@@ -688,6 +701,7 @@ GameObject:
   - component: {fileID: 33564037077110960}
   - component: {fileID: 23437708018143726}
   - component: {fileID: 114059889282888524}
+  - component: {fileID: 64750628889605396}
   m_Layer: 0
   m_Name: StampRight
   m_TagString: Untagged
@@ -706,6 +720,7 @@ GameObject:
   - component: {fileID: 33903619066698626}
   - component: {fileID: 23481063340231588}
   - component: {fileID: 114121506356825660}
+  - component: {fileID: 64992651658742362}
   m_Layer: 0
   m_Name: RotateCCW
   m_TagString: Untagged
@@ -742,6 +757,7 @@ GameObject:
   - component: {fileID: 33890603809043738}
   - component: {fileID: 23973036423924776}
   - component: {fileID: 114430221577661078}
+  - component: {fileID: 64204920658826548}
   m_Layer: 0
   m_Name: Q2Top
   m_TagString: Untagged
@@ -777,6 +793,7 @@ GameObject:
   - component: {fileID: 33605365591285214}
   - component: {fileID: 23807131257818146}
   - component: {fileID: 114691299197891464}
+  - component: {fileID: 64581275090177714}
   m_Layer: 0
   m_Name: Q4Down
   m_TagString: Untagged
@@ -844,6 +861,7 @@ GameObject:
   - component: {fileID: 33158658788578246}
   - component: {fileID: 23021592860556920}
   - component: {fileID: 114761497909590934}
+  - component: {fileID: 64720254382432924}
   m_Layer: 0
   m_Name: Q1Left
   m_TagString: Untagged
@@ -964,6 +982,7 @@ GameObject:
   - component: {fileID: 33998721573872874}
   - component: {fileID: 23327712942513918}
   - component: {fileID: 114407401446671090}
+  - component: {fileID: 64975573248623130}
   m_Layer: 0
   m_Name: Q2Down
   m_TagString: Untagged
@@ -982,6 +1001,7 @@ GameObject:
   - component: {fileID: 33466116700295662}
   - component: {fileID: 23275377048699108}
   - component: {fileID: 114089336561730772}
+  - component: {fileID: 64096515685940192}
   m_Layer: 0
   m_Name: Q1Down
   m_TagString: Untagged
@@ -1119,6 +1139,7 @@ GameObject:
   - component: {fileID: 33689874374599872}
   - component: {fileID: 23159185095176504}
   - component: {fileID: 114321070573919342}
+  - component: {fileID: 64549915792201094}
   m_Layer: 0
   m_Name: Q2Left
   m_TagString: Untagged
@@ -1137,6 +1158,7 @@ GameObject:
   - component: {fileID: 33932687486947208}
   - component: {fileID: 23268748439041882}
   - component: {fileID: 114655546896191368}
+  - component: {fileID: 64069028207271168}
   m_Layer: 0
   m_Name: Q3Top
   m_TagString: Untagged
@@ -1188,6 +1210,7 @@ GameObject:
   - component: {fileID: 33245136453717530}
   - component: {fileID: 23467478863367548}
   - component: {fileID: 114232319493283256}
+  - component: {fileID: 64904818110162910}
   m_Layer: 0
   m_Name: StampDown
   m_TagString: Untagged
@@ -1377,6 +1400,7 @@ GameObject:
   - component: {fileID: 33354321289216908}
   - component: {fileID: 23852469184702048}
   - component: {fileID: 114636917888645320}
+  - component: {fileID: 64696530216083698}
   m_Layer: 0
   m_Name: StampTop
   m_TagString: Untagged
@@ -1412,6 +1436,7 @@ GameObject:
   - component: {fileID: 33618585284111486}
   - component: {fileID: 23503261492369910}
   - component: {fileID: 114989285112037006}
+  - component: {fileID: 64106963621348388}
   m_Layer: 0
   m_Name: Q3Right
   m_TagString: Untagged
@@ -4653,6 +4678,342 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1733741801358496}
   m_Mesh: {fileID: 4300014, guid: 1ea7d06a30cb5364ebc821d7e769fcd8, type: 3}
+--- !u!64 &64069028207271168
+MeshCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1819494358326352}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Convex: 1
+  m_CookingOptions: 14
+  m_SkinWidth: 0.01
+  m_Mesh: {fileID: 4300030, guid: 1ea7d06a30cb5364ebc821d7e769fcd8, type: 3}
+--- !u!64 &64096515685940192
+MeshCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1737248649045358}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Convex: 1
+  m_CookingOptions: 14
+  m_SkinWidth: 0.01
+  m_Mesh: {fileID: 4300004, guid: 1ea7d06a30cb5364ebc821d7e769fcd8, type: 3}
+--- !u!64 &64106963621348388
+MeshCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1991080544321128}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Convex: 1
+  m_CookingOptions: 14
+  m_SkinWidth: 0.01
+  m_Mesh: {fileID: 4300028, guid: 1ea7d06a30cb5364ebc821d7e769fcd8, type: 3}
+--- !u!64 &64204920658826548
+MeshCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1522576916587246}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Convex: 1
+  m_CookingOptions: 14
+  m_SkinWidth: 0.01
+  m_Mesh: {fileID: 4300020, guid: 1ea7d06a30cb5364ebc821d7e769fcd8, type: 3}
+--- !u!64 &64238245733874984
+MeshCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1332209222394122}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Convex: 1
+  m_CookingOptions: 14
+  m_SkinWidth: 0.01
+  m_Mesh: {fileID: 4300074, guid: 1ea7d06a30cb5364ebc821d7e769fcd8, type: 3}
+--- !u!64 &64238739617843342
+MeshCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1476899195903728}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Convex: 1
+  m_CookingOptions: 14
+  m_SkinWidth: 0.01
+  m_Mesh: {fileID: 4300024, guid: 1ea7d06a30cb5364ebc821d7e769fcd8, type: 3}
+--- !u!64 &64257414721131996
+MeshCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1462240425915702}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Convex: 1
+  m_CookingOptions: 14
+  m_SkinWidth: 0.01
+  m_Mesh: {fileID: 4300042, guid: 1ea7d06a30cb5364ebc821d7e769fcd8, type: 3}
+--- !u!64 &64302120977120086
+MeshCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1286172329683090}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Convex: 1
+  m_CookingOptions: 14
+  m_SkinWidth: 0.01
+  m_Mesh: {fileID: 4300010, guid: 1ea7d06a30cb5364ebc821d7e769fcd8, type: 3}
+--- !u!64 &64324500442896258
+MeshCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1361345517272158}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Convex: 1
+  m_CookingOptions: 14
+  m_SkinWidth: 0.01
+  m_Mesh: {fileID: 4300026, guid: 1ea7d06a30cb5364ebc821d7e769fcd8, type: 3}
+--- !u!64 &64496732376778836
+MeshCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1241959947363294}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Convex: 1
+  m_CookingOptions: 14
+  m_SkinWidth: 0.01
+  m_Mesh: {fileID: 4300040, guid: 1ea7d06a30cb5364ebc821d7e769fcd8, type: 3}
+--- !u!64 &64549915792201094
+MeshCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1807365545150234}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Convex: 1
+  m_CookingOptions: 14
+  m_SkinWidth: 0.01
+  m_Mesh: {fileID: 4300016, guid: 1ea7d06a30cb5364ebc821d7e769fcd8, type: 3}
+--- !u!64 &64581275090177714
+MeshCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1563514753988434}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Convex: 1
+  m_CookingOptions: 14
+  m_SkinWidth: 0.01
+  m_Mesh: {fileID: 4300034, guid: 1ea7d06a30cb5364ebc821d7e769fcd8, type: 3}
+--- !u!64 &64630430282836444
+MeshCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1329325829057438}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Convex: 1
+  m_CookingOptions: 14
+  m_SkinWidth: 0.01
+  m_Mesh: {fileID: 4300050, guid: 1ea7d06a30cb5364ebc821d7e769fcd8, type: 3}
+--- !u!64 &64696530216083698
+MeshCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1971589738911154}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Convex: 1
+  m_CookingOptions: 14
+  m_SkinWidth: 0.01
+  m_Mesh: {fileID: 4300072, guid: 1ea7d06a30cb5364ebc821d7e769fcd8, type: 3}
+--- !u!64 &64720254382432924
+MeshCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1621715091885350}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Convex: 1
+  m_CookingOptions: 14
+  m_SkinWidth: 0.01
+  m_Mesh: {fileID: 4300006, guid: 1ea7d06a30cb5364ebc821d7e769fcd8, type: 3}
+--- !u!64 &64750628889605396
+MeshCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1484661774241898}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Convex: 1
+  m_CookingOptions: 14
+  m_SkinWidth: 0.01
+  m_Mesh: {fileID: 4300052, guid: 1ea7d06a30cb5364ebc821d7e769fcd8, type: 3}
+--- !u!64 &64889938810936062
+MeshCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1010197479979738}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Convex: 1
+  m_CookingOptions: 14
+  m_SkinWidth: 0.01
+  m_Mesh: {fileID: 4300036, guid: 1ea7d06a30cb5364ebc821d7e769fcd8, type: 3}
+--- !u!64 &64904818110162910
+MeshCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1868638263134836}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Convex: 1
+  m_CookingOptions: 14
+  m_SkinWidth: 0.01
+  m_Mesh: {fileID: 4300048, guid: 1ea7d06a30cb5364ebc821d7e769fcd8, type: 3}
+--- !u!64 &64937901000992192
+MeshCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1475126944681328}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Convex: 1
+  m_CookingOptions: 14
+  m_SkinWidth: 0.01
+  m_Mesh: {fileID: 4300008, guid: 1ea7d06a30cb5364ebc821d7e769fcd8, type: 3}
+--- !u!64 &64957655973614182
+MeshCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1375040954932010}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Convex: 1
+  m_CookingOptions: 14
+  m_SkinWidth: 0.01
+  m_Mesh: {fileID: 4300046, guid: 1ea7d06a30cb5364ebc821d7e769fcd8, type: 3}
+--- !u!64 &64958525466925782
+MeshCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1470282292303866}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Convex: 1
+  m_CookingOptions: 14
+  m_SkinWidth: 0.01
+  m_Mesh: {fileID: 4300018, guid: 1ea7d06a30cb5364ebc821d7e769fcd8, type: 3}
+--- !u!64 &64966475048577580
+MeshCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1073006038981018}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Convex: 1
+  m_CookingOptions: 14
+  m_SkinWidth: 0.01
+  m_Mesh: {fileID: 4300038, guid: 1ea7d06a30cb5364ebc821d7e769fcd8, type: 3}
+--- !u!64 &64975573248623130
+MeshCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1733741801358496}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Convex: 1
+  m_CookingOptions: 14
+  m_SkinWidth: 0.01
+  m_Mesh: {fileID: 4300014, guid: 1ea7d06a30cb5364ebc821d7e769fcd8, type: 3}
+--- !u!64 &64992651658742362
+MeshCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1487599010076824}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Convex: 1
+  m_CookingOptions: 14
+  m_SkinWidth: 0.01
+  m_Mesh: {fileID: 4300044, guid: 1ea7d06a30cb5364ebc821d7e769fcd8, type: 3}
 --- !u!102 &102580728021190402
 TextMesh:
   serializedVersion: 3
@@ -4750,7 +5111,8 @@ MonoBehaviour:
   IsPassThrough: 0
   ChildRowLength: 0
   Highlight: {fileID: 114589190645881730}
-  SelectableColliders: []
+  SelectableColliders:
+  - {fileID: 64750628889605396}
   DefaultSelectableIndex: 0
   AllowSelectionWrapX: 0
   AllowSelectionWrapY: 0
@@ -4772,7 +5134,8 @@ MonoBehaviour:
   IsPassThrough: 0
   ChildRowLength: 0
   Highlight: {fileID: 114293432522045748}
-  SelectableColliders: []
+  SelectableColliders:
+  - {fileID: 64496732376778836}
   DefaultSelectableIndex: 0
   AllowSelectionWrapX: 0
   AllowSelectionWrapY: 0
@@ -4794,7 +5157,8 @@ MonoBehaviour:
   IsPassThrough: 0
   ChildRowLength: 0
   Highlight: {fileID: 114323179843049932}
-  SelectableColliders: []
+  SelectableColliders:
+  - {fileID: 64096515685940192}
   DefaultSelectableIndex: 0
   AllowSelectionWrapX: 0
   AllowSelectionWrapY: 0
@@ -4816,7 +5180,8 @@ MonoBehaviour:
   IsPassThrough: 0
   ChildRowLength: 0
   Highlight: {fileID: 114227888172306942}
-  SelectableColliders: []
+  SelectableColliders:
+  - {fileID: 64992651658742362}
   DefaultSelectableIndex: 0
   AllowSelectionWrapX: 0
   AllowSelectionWrapY: 0
@@ -4877,7 +5242,8 @@ MonoBehaviour:
   IsPassThrough: 0
   ChildRowLength: 0
   Highlight: {fileID: 114982739585704750}
-  SelectableColliders: []
+  SelectableColliders:
+  - {fileID: 64966475048577580}
   DefaultSelectableIndex: 0
   AllowSelectionWrapX: 0
   AllowSelectionWrapY: 0
@@ -4912,7 +5278,8 @@ MonoBehaviour:
   IsPassThrough: 0
   ChildRowLength: 0
   Highlight: {fileID: 114365654659613870}
-  SelectableColliders: []
+  SelectableColliders:
+  - {fileID: 64904818110162910}
   DefaultSelectableIndex: 0
   AllowSelectionWrapX: 0
   AllowSelectionWrapY: 0
@@ -4995,7 +5362,8 @@ MonoBehaviour:
   IsPassThrough: 0
   ChildRowLength: 0
   Highlight: {fileID: 114047828073615140}
-  SelectableColliders: []
+  SelectableColliders:
+  - {fileID: 64958525466925782}
   DefaultSelectableIndex: 0
   AllowSelectionWrapX: 0
   AllowSelectionWrapY: 0
@@ -5017,7 +5385,8 @@ MonoBehaviour:
   IsPassThrough: 0
   ChildRowLength: 0
   Highlight: {fileID: 114002651028246592}
-  SelectableColliders: []
+  SelectableColliders:
+  - {fileID: 64549915792201094}
   DefaultSelectableIndex: 0
   AllowSelectionWrapX: 0
   AllowSelectionWrapY: 0
@@ -5049,6 +5418,86 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   HighlightScale: {x: 1, y: 1, z: 1}
   OutlineAmount: 0
+--- !u!114 &114351514030367552
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1226897576497620}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b01a24c8fb046c146b8df1507d84a54c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Bomb: {fileID: 114869854774708180}
+  Audio: {fileID: 114797460587858252}
+  Buttons:
+  - {fileID: 114636917888645320}
+  - {fileID: 114059889282888524}
+  - {fileID: 114232319493283256}
+  - {fileID: 114492438491611020}
+  - {fileID: 114378482384225658}
+  - {fileID: 114121506356825660}
+  - {fileID: 114296764876671630}
+  - {fileID: 114884230434697376}
+  - {fileID: 114878395783109772}
+  - {fileID: 114377067534379372}
+  - {fileID: 114942860613532446}
+  - {fileID: 114879996937577306}
+  - {fileID: 114809453159617194}
+  - {fileID: 114674225090392110}
+  - {fileID: 114435669688516620}
+  - {fileID: 114374386948158678}
+  - {fileID: 114089336561730772}
+  - {fileID: 114761497909590934}
+  - {fileID: 114452053276635126}
+  - {fileID: 114430221577661078}
+  - {fileID: 114407401446671090}
+  - {fileID: 114321070573919342}
+  - {fileID: 114310148879387924}
+  - {fileID: 114655546896191368}
+  - {fileID: 114758100457380914}
+  - {fileID: 114981652862258438}
+  - {fileID: 114989285112037006}
+  - {fileID: 114084538032380398}
+  - {fileID: 114691299197891464}
+  - {fileID: 114770753783741176}
+  - {fileID: 114227836721691318}
+  - {fileID: 114843657010418348}
+  - {fileID: 114296764876671630}
+  AnimationWhite: {fileID: 2100000, guid: 029a51abbf780994f804d85dc036cb7f, type: 2}
+  NoColor: {fileID: 2100000, guid: 1579ca9b4dd1ef54cb1fc0385237a1ec, type: 2}
+  Colors:
+  - {fileID: 2100000, guid: cd340d4f2964c734da6c51e0889d248f, type: 2}
+  - {fileID: 2100000, guid: 7f479ceab6b9a2a4a8903e843306b7aa, type: 2}
+  - {fileID: 2100000, guid: 5fd1f139cab8ab44d954d26f5252bbc1, type: 2}
+  - {fileID: 2100000, guid: 1100930de3853c341ae15b0ae24569de, type: 2}
+  - {fileID: 2100000, guid: 18bcccc5d2f7c1c4fa1acbfd4833cd1c, type: 2}
+  - {fileID: 2100000, guid: 0c2f8d6ae7e2ced458d4fa513081efd2, type: 2}
+  - {fileID: 2100000, guid: a0b300e0738800f4287d93f02ad1d300, type: 2}
+  - {fileID: 2100000, guid: 77da2b219d39d7a4989eabda16632bc4, type: 2}
+  GridTiles:
+  - {fileID: 1286172329683090}
+  - {fileID: 1737248649045358}
+  - {fileID: 1621715091885350}
+  - {fileID: 1475126944681328}
+  - {fileID: 1522576916587246}
+  - {fileID: 1733741801358496}
+  - {fileID: 1807365545150234}
+  - {fileID: 1470282292303866}
+  - {fileID: 1819494358326352}
+  - {fileID: 1476899195903728}
+  - {fileID: 1361345517272158}
+  - {fileID: 1991080544321128}
+  - {fileID: 1241959947363294}
+  - {fileID: 1563514753988434}
+  - {fileID: 1010197479979738}
+  - {fileID: 1073006038981018}
+  Stamp:
+  - {fileID: 1971589738911154}
+  - {fileID: 1484661774241898}
+  - {fileID: 1868638263134836}
+  - {fileID: 1329325829057438}
 --- !u!114 &114365654659613870
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -5078,7 +5527,8 @@ MonoBehaviour:
   IsPassThrough: 0
   ChildRowLength: 0
   Highlight: {fileID: 114323443063960464}
-  SelectableColliders: []
+  SelectableColliders:
+  - {fileID: 64302120977120086}
   DefaultSelectableIndex: 0
   AllowSelectionWrapX: 0
   AllowSelectionWrapY: 0
@@ -5122,7 +5572,8 @@ MonoBehaviour:
   IsPassThrough: 0
   ChildRowLength: 0
   Highlight: {fileID: 114710088667934952}
-  SelectableColliders: []
+  SelectableColliders:
+  - {fileID: 64957655973614182}
   DefaultSelectableIndex: 0
   AllowSelectionWrapX: 0
   AllowSelectionWrapY: 0
@@ -5157,7 +5608,8 @@ MonoBehaviour:
   IsPassThrough: 0
   ChildRowLength: 0
   Highlight: {fileID: 114533894797898288}
-  SelectableColliders: []
+  SelectableColliders:
+  - {fileID: 64975573248623130}
   DefaultSelectableIndex: 0
   AllowSelectionWrapX: 0
   AllowSelectionWrapY: 0
@@ -5206,7 +5658,8 @@ MonoBehaviour:
   IsPassThrough: 0
   ChildRowLength: 0
   Highlight: {fileID: 114302833988396584}
-  SelectableColliders: []
+  SelectableColliders:
+  - {fileID: 64204920658826548}
   DefaultSelectableIndex: 0
   AllowSelectionWrapX: 0
   AllowSelectionWrapY: 0
@@ -5274,7 +5727,8 @@ MonoBehaviour:
   IsPassThrough: 0
   ChildRowLength: 0
   Highlight: {fileID: 114527011625828996}
-  SelectableColliders: []
+  SelectableColliders:
+  - {fileID: 64937901000992192}
   DefaultSelectableIndex: 0
   AllowSelectionWrapX: 0
   AllowSelectionWrapY: 0
@@ -5309,7 +5763,8 @@ MonoBehaviour:
   IsPassThrough: 0
   ChildRowLength: 0
   Highlight: {fileID: 114294205011942332}
-  SelectableColliders: []
+  SelectableColliders:
+  - {fileID: 64630430282836444}
   DefaultSelectableIndex: 0
   AllowSelectionWrapX: 0
   AllowSelectionWrapY: 0
@@ -5396,7 +5851,8 @@ MonoBehaviour:
   IsPassThrough: 0
   ChildRowLength: 0
   Highlight: {fileID: 114720799179661088}
-  SelectableColliders: []
+  SelectableColliders:
+  - {fileID: 64696530216083698}
   DefaultSelectableIndex: 0
   AllowSelectionWrapX: 0
   AllowSelectionWrapY: 0
@@ -5418,7 +5874,8 @@ MonoBehaviour:
   IsPassThrough: 0
   ChildRowLength: 0
   Highlight: {fileID: 114578525270064016}
-  SelectableColliders: []
+  SelectableColliders:
+  - {fileID: 64069028207271168}
   DefaultSelectableIndex: 0
   AllowSelectionWrapX: 0
   AllowSelectionWrapY: 0
@@ -5462,7 +5919,8 @@ MonoBehaviour:
   IsPassThrough: 0
   ChildRowLength: 0
   Highlight: {fileID: 114886991569024890}
-  SelectableColliders: []
+  SelectableColliders:
+  - {fileID: 64581275090177714}
   DefaultSelectableIndex: 0
   AllowSelectionWrapX: 0
   AllowSelectionWrapY: 0
@@ -5562,7 +6020,8 @@ MonoBehaviour:
   IsPassThrough: 0
   ChildRowLength: 0
   Highlight: {fileID: 114451503677083528}
-  SelectableColliders: []
+  SelectableColliders:
+  - {fileID: 64238739617843342}
   DefaultSelectableIndex: 0
   AllowSelectionWrapX: 0
   AllowSelectionWrapY: 0
@@ -5584,7 +6043,8 @@ MonoBehaviour:
   IsPassThrough: 0
   ChildRowLength: 0
   Highlight: {fileID: 114714501550539122}
-  SelectableColliders: []
+  SelectableColliders:
+  - {fileID: 64720254382432924}
   DefaultSelectableIndex: 0
   AllowSelectionWrapX: 0
   AllowSelectionWrapY: 0
@@ -5661,7 +6121,8 @@ MonoBehaviour:
   IsPassThrough: 0
   ChildRowLength: 0
   Highlight: {fileID: 114406253014826182}
-  SelectableColliders: []
+  SelectableColliders:
+  - {fileID: 64889938810936062}
   DefaultSelectableIndex: 0
   AllowSelectionWrapX: 0
   AllowSelectionWrapY: 0
@@ -5742,7 +6203,8 @@ MonoBehaviour:
   IsPassThrough: 0
   ChildRowLength: 0
   Highlight: {fileID: 114820407856504554}
-  SelectableColliders: []
+  SelectableColliders:
+  - {fileID: 64257414721131996}
   DefaultSelectableIndex: 0
   AllowSelectionWrapX: 0
   AllowSelectionWrapY: 0
@@ -5902,7 +6364,8 @@ MonoBehaviour:
   IsPassThrough: 0
   ChildRowLength: 0
   Highlight: {fileID: 114749762322251112}
-  SelectableColliders: []
+  SelectableColliders:
+  - {fileID: 64324500442896258}
   DefaultSelectableIndex: 0
   AllowSelectionWrapX: 0
   AllowSelectionWrapY: 0
@@ -5937,7 +6400,8 @@ MonoBehaviour:
   IsPassThrough: 0
   ChildRowLength: 0
   Highlight: {fileID: 114902586222813360}
-  SelectableColliders: []
+  SelectableColliders:
+  - {fileID: 64106963621348388}
   DefaultSelectableIndex: 0
   AllowSelectionWrapX: 0
   AllowSelectionWrapY: 0
@@ -5959,7 +6423,8 @@ MonoBehaviour:
   IsPassThrough: 0
   ChildRowLength: 0
   Highlight: {fileID: 114486398615966542}
-  SelectableColliders: []
+  SelectableColliders:
+  - {fileID: 64238245733874984}
   DefaultSelectableIndex: 0
   AllowSelectionWrapX: 0
   AllowSelectionWrapY: 0

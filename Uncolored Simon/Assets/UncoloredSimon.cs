@@ -2,196 +2,778 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using UnityEngine;
 using KModkit;
 using Rnd = UnityEngine.Random;
 using Math = ExMath;
+using HarmonyLib;
+using static UnityEditor.Graphs.Styles;
+using UnityEditor;
+using static UnityEditor.Experimental.Build.AssetBundle.BuildOutput;
 
 public class UncoloredSimon : MonoBehaviour
 {
-
+    #region Public Unity Fields
     public KMBombInfo Bomb;
     public KMAudio Audio;
+    public Transform ModuleTransform;
+    public KMSelectable[] Buttons;
+    public Material NoColor;
+    public Material[] unlitColors;
+    public Material[] litColors;
+    public Material[] Grays;
+    public List<GameObject> GridTiles;
+    public List<GameObject> Stamp;
+    #endregion
 
+    #region Private Fields
     static int ModuleIdCounter = 1;
     int ModuleId;
-    private bool ModuleSolved;
+    bool ModuleSolved;
+    bool twoPair = false;
+    bool CheckStampIsRunning = false;
+    bool playSimon = false;
+    bool CheckGridIsRunning = false;
+    ModulePhase currentPhase = ModulePhase.Gray;
 
-    public KMSelectable[] Buttons;
+    int[] currentStampColor = new int[] { -1, -1, -1, -1 };
+    int[] oldStamp;
+    Dictionary<ColorNames, List<int>> StampOrderLists;
+    Dictionary<int, List<Material>> QColors;
+    MeshRenderer[] gridRenderers;
+    MeshRenderer[] stampRenderer;
+    List<int> stampOrder = new List<int>();
+    List<GameObject> playedSimonPhase = new List<GameObject>();
+    List<Material> ColoredGrid = new List<Material>();
+    List<Material> correctStamp = new List<Material>();
+    Material[] Grayscale;
+    Material[,] stampTable;
+    #endregion
 
-    public Material AnimationWhite;
-    public Material NoColor;
-    public Material[] Colors;
-    public List<GameObject> GridTiles;
-    int[] currentStampColor = new int[] { -1, -1, -1, -1};
-    public List<GameObject> Stamp;
-    List<string> Sounds;
-
-    enum ButtonNames
+    #region Enums
+    enum ModulePhase
     {
-        StampTop = 0,
-        StampRight = 1,
-        StampDown = 2,
-        StampLeft = 3,
-        RotateCW = 4,
-        RotateCCW = 5
+        Gray,
+        Stamp,
+        Simon
+    }
+    enum ColorNames
+    {
+        Blue, Brown, Cyan, Green, Magenta, Purple, Red, Yellow
+    }
+
+    public enum ButtonNames
+    {
+        StampTop, StampRight, StampDown, StampLeft,
+        RotateCW, RotateCCW,
+        StampSpotTop, StampSpotTopLeft, StampSpotTopRight,
+        StampSpotLeft, StampSpotMiddle, StampSpotRight,
+        StampSpotDownLeft, StampSpotDownRight, StampSpotDown,
+        Q1Top, Q1Down, Q1Left, Q1Right,
+        Q2Top, Q2Down, Q2Left, Q2Right,
+        Q3Top, Q3Down, Q3Left, Q3Right,
+        Q4Top, Q4Down, Q4Left, Q4Right,
+        ResetButton, Submit
     }
 
     enum SoundeffectNames
     {
-        Color1,
-        Color2,
-        Color3,
-        Color4,
-        Color5,
-        Color6,
-        Color7,
-        Color8,
-        RotateCW,
-        RotateCCW,
-        Correct,
-        CheckBigGrid
+        Blue, Brown, Cyan, Green, Magenta, Purple, Red, Yellow,
+        RotateCW, RotateCCW,
+        ShortCorrect, LongCorrect, ShortFail, LongFail, CheckBigGrid
     }
+    #endregion
 
+    #region Unity Lifecycle
     void Awake()
-    { //Avoid doing calculations in here regarding edgework. Just use this for setting up buttons for simplicity.
+    {
         ModuleId = ModuleIdCounter++;
         GetComponent<KMBombModule>().OnActivate += Activate;
-        
-        foreach (KMSelectable button in Buttons) {
+
+        foreach (KMSelectable button in Buttons)
             button.OnInteract += delegate () { InputHandler(button); return false; };
-        }
-        
-
-        //button.OnInteract += delegate () { buttonPress(); return false; };
-
-    }
-
-    void OnDestroy()
-    { //Shit you need to do when the bomb ends
-
-    }
-
-    void Activate()
-    { //Shit that should happen when the bomb arrives (factory)/Lights turn on
-        StartCoroutine(CheckBigGridAnimation());
     }
 
     void Start()
-    { //Shit that you calculate, usually a majority if not all of the module
-        Sounds = new List<string> { SoundeffectNames.Color1.ToString(),
-                                    SoundeffectNames.Color2.ToString(),
-                                    SoundeffectNames.Color3.ToString(),
-                                    SoundeffectNames.Color4.ToString(),
-                                    SoundeffectNames.Color5.ToString(),
-                                    SoundeffectNames.Color6.ToString(),
-                                    SoundeffectNames.Color7.ToString(),
-                                    SoundeffectNames.Color8.ToString(),
-                                    SoundeffectNames.RotateCW.ToString(),
-                                    SoundeffectNames.RotateCCW.ToString(),
-                                    SoundeffectNames.CheckBigGrid.ToString(),
-                                    SoundeffectNames.Correct.ToString(),
+    {
+        List<MeshRenderer> renderers = new List<MeshRenderer>();
+        foreach (GameObject obj in GridTiles)
+            renderers.Add(obj.GetComponent<MeshRenderer>());
+        gridRenderers = renderers.ToArray();
+
+        renderers.Clear();
+        foreach (GameObject obj in Stamp)
+            renderers.Add(obj.GetComponent<MeshRenderer>());
+        stampRenderer = renderers.ToArray();
+
+        stampTable = new Material[4, 4]
+        {
+            { unlitColors[(int)ColorNames.Cyan],    unlitColors[(int)ColorNames.Red],    unlitColors[(int)ColorNames.Brown],   unlitColors[(int)ColorNames.Purple] },
+            { unlitColors[(int)ColorNames.Purple],  unlitColors[(int)ColorNames.Yellow], unlitColors[(int)ColorNames.Magenta], unlitColors[(int)ColorNames.Green] },
+            { unlitColors[(int)ColorNames.Brown],   unlitColors[(int)ColorNames.Green],  unlitColors[(int)ColorNames.Cyan],    unlitColors[(int)ColorNames.Blue] },
+            { unlitColors[(int)ColorNames.Magenta], unlitColors[(int)ColorNames.Blue],   unlitColors[(int)ColorNames.Red],     unlitColors[(int)ColorNames.Yellow] }
+        };
+
+        GenerateGrayscale();
+
+        StampOrderLists = new Dictionary<ColorNames, List<int>>
+        {
+            { ColorNames.Blue,    new List<int> { 4, 9, 2, 7, 6, 1, 3, 5, 8 } },
+            { ColorNames.Brown,   new List<int> { 6, 3, 1, 9, 8, 2, 5, 4, 7 } },
+            { ColorNames.Cyan,    new List<int> { 2, 5, 7, 1, 9, 6, 8, 3, 4 } },
+            { ColorNames.Green,   new List<int> { 8, 7, 6, 3, 2, 4, 9, 1, 5 } },
+            { ColorNames.Magenta, new List<int> { 7, 8, 3, 2, 5, 9, 4, 6, 1 } },
+            { ColorNames.Purple,  new List<int> { 3, 6, 9, 5, 4, 8, 1, 7, 2 } },
+            { ColorNames.Red,     new List<int> { 5, 2, 4, 6, 1, 3, 7, 8, 9 } },
+            { ColorNames.Yellow,  new List<int> { 1, 4, 5, 8, 3, 7, 2, 9, 6 } },
         };
     }
 
-    void Update()
-    { //Shit that happens at any point after initialization
-
+    void Activate()
+    {
+        StartCoroutine(DisplayGrayscale());
     }
 
-    void ChangeColorStamp(int index)
+    void Update()
     {
-        switch (index)
+        // Nothing needed here right now
+    }
+
+    void OnDestroy()
+    {
+        // Cleanup if needed
+    }
+    #endregion
+
+    #region Coroutines
+    IEnumerator DisplayGrayscale()
+    {
+        Playsound(SoundeffectNames.CheckBigGrid);
+        for (int i = 0; i < GridTiles.Count; i++)
         {
-            case (0):
-                currentStampColor[(int)ButtonNames.StampTop] += 1;
-                    Debug.Log(currentStampColor[(int)ButtonNames.StampTop]);
-                if (currentStampColor[(int)ButtonNames.StampTop] >= Colors.Length)
-                {
-                    currentStampColor[(int)ButtonNames.StampTop] = 0;
-                }
-                Stamp[(int)ButtonNames.StampTop].GetComponent<MeshRenderer>().material = Colors[currentStampColor[(int)ButtonNames.StampTop]];
-                Audio.PlaySoundAtTransform(Sounds[currentStampColor[(int)ButtonNames.StampTop]], transform);
+            gridRenderers[i].material = Grayscale[i];
+            yield return new WaitForSeconds(1.77f / 16f);
+        }
+
+        FillQuadrantsWithCurrentColor();
+        GetCorrectStampColors();
+    }
+
+    IEnumerator CheckStampAnimation()
+    {
+        if (CheckStampIsRunning) yield break;
+        CheckStampIsRunning = true;
+        for (int i = 0; i < 4; i++)
+        {
+
+            int index = Array.IndexOf(unlitColors, stampRenderer[i].sharedMaterial);
+            if (correctStamp[i].name == unlitColors[currentStampColor[i]].name)
+            {
+                stampRenderer[i].material = litColors[index];
+                Playsound((SoundeffectNames)index);
+                yield return new WaitForSeconds(.5f);
+                continue;
+            }
+            Strike();
+            ChangeStampColor();
+            CheckStampIsRunning = false;
+            yield break;
+        }
+        currentPhase = ModulePhase.Stamp;
+        CheckStampIsRunning = false;
+        Playsound(SoundeffectNames.ShortCorrect);
+        ChangeStampColor();
+        StartCoroutine(InitiateStampPhaseAnimation());
+        GenerateStampPositions();
+        GetCorrectGridColors();
+    }
+
+    IEnumerator CheckGridAnimation()
+    {
+        if (CheckGridIsRunning) yield break;
+        CheckGridIsRunning = true;
+        for (int i = 0; i < gridRenderers.Length; i++)
+        {
+
+            int index = Array.IndexOf(unlitColors, gridRenderers[i].sharedMaterial);
+            Debug.Log(unlitColors[index]);
+            if (ColoredGrid[i].name == unlitColors[index].name)
+            {
+                gridRenderers[i].material = litColors[index];
+                Playsound((SoundeffectNames)index);
+                yield return new WaitForSeconds(.2f);
+                continue;
+            }
+            Strike();
+            GridToUnlit();
+            CheckGridIsRunning = false;
+            yield break;
+        }
+        currentPhase = ModulePhase.Simon;
+        CheckGridIsRunning = false;
+        Playsound(SoundeffectNames.ShortCorrect);
+        GridToUnlit();
+        foreach (MeshRenderer mr in stampRenderer)
+        {
+            mr.material = NoColor;
+        }
+        GenerateSimonPhase();
+        playSimon = true;
+        yield return new WaitForSeconds(1.5f);
+        StartCoroutine(PlaySimonPhase());
+    }
+
+    IEnumerator InitiateStampPhaseAnimation()
+    {
+        for (int i = 0; i < 16; i++)
+        {
+            gridRenderers[i].material = NoColor;
+            yield return new WaitForSeconds(1f / 16f);
+        }
+    }
+
+    IEnumerator PlaySimonPhase()
+    {
+        foreach (GameObject Obj in playedSimonPhase)
+        {
+            int index = Array.IndexOf(unlitColors, Obj.GetComponent<MeshRenderer>().sharedMaterial);
+            Obj.GetComponent<MeshRenderer>().material = litColors[index];
+            Playsound((SoundeffectNames)index);
+            yield return new WaitForSeconds(.8f);
+            Obj.GetComponent<MeshRenderer>().material = unlitColors[index];
+        }
+        if (playSimon)
+        {
+            yield return new WaitForSeconds(2.5f);
+            StartCoroutine(PlaySimonPhase());
+        }
+    }
+
+    IEnumerator CheckAFK()
+    {
+        yield return new WaitForSeconds(3f);
+        playSimon = true;
+        StartCoroutine(PlaySimonPhase());
+    }
+    #endregion
+
+    #region Input Handling
+    void InputHandler(KMSelectable button)
+    {
+        //Simon Phase play handler
+        if (currentPhase == ModulePhase.Simon)
+        {
+            foreach (GameObject Obj in playedSimonPhase)
+            {
+                int indexColor = Array.IndexOf(litColors, Obj.GetComponent<MeshRenderer>().sharedMaterial);
+                if (indexColor != -1) Obj.GetComponent<MeshRenderer>().material = unlitColors[indexColor];
+            }
+            StopAllCoroutines();
+            StartCoroutine(CheckAFK());
+        }
+
+        //Get index from array
+        int index = Array.IndexOf(Buttons, button);
+
+        //Catch exceptions and log them
+        if (index == -1)
+        {
+            Debug.Log("Value: " + button + " not valid in the InputHandler");
+            return;
+        }
+
+        //Log pressed button
+        Debug.Log(button);
+
+        //Logic for what button pressed
+        ButtonNames btn = (ButtonNames)index;
+        switch (btn)
+        {
+            //Stamp color change
+            case ButtonNames.StampTop:
+            case ButtonNames.StampRight:
+            case ButtonNames.StampDown:
+            case ButtonNames.StampLeft:
+                if (currentPhase != ModulePhase.Gray || CheckStampIsRunning) return;
+                ChangeStampIndex(index);
                 break;
-            case (1):
-                currentStampColor[(int)ButtonNames.StampRight] += 1;
-                Debug.Log(currentStampColor[(int)ButtonNames.StampRight]);
-                if (currentStampColor[(int)ButtonNames.StampRight] >= Colors.Length)
-                {
-                    currentStampColor[(int)ButtonNames.StampRight] = 0;
-                }
-                Stamp[(int)ButtonNames.StampRight].GetComponent<MeshRenderer>().material = Colors[currentStampColor[(int)ButtonNames.StampRight]];
-                Audio.PlaySoundAtTransform(Sounds[currentStampColor[(int)ButtonNames.StampRight]], transform);
+
+            //Stamp rotation
+            case ButtonNames.RotateCW:
+            case ButtonNames.RotateCCW:
+                if (currentPhase != ModulePhase.Stamp) return;
+                Playsound((ButtonNames)index == ButtonNames.RotateCW
+                    ? SoundeffectNames.RotateCW
+                    : SoundeffectNames.RotateCCW);
+                RotateStamp(index);
                 break;
-            case (2):
-                currentStampColor[(int)ButtonNames.StampDown] += 1;
-                Debug.Log(currentStampColor[(int)ButtonNames.StampDown]);
-                if (currentStampColor[(int)ButtonNames.StampDown] >= Colors.Length)
-                {
-                    currentStampColor[(int)ButtonNames.StampDown] = 0;
-                }
-                Stamp[(int)ButtonNames.StampDown].GetComponent<MeshRenderer>().material = Colors[currentStampColor[(int)ButtonNames.StampDown]];
-                Audio.PlaySoundAtTransform(Sounds[currentStampColor[(int)ButtonNames.StampDown]], transform);
+            case ButtonNames.StampSpotTop:
+            case ButtonNames.StampSpotTopLeft:
+            case ButtonNames.StampSpotTopRight:
+            case ButtonNames.StampSpotLeft:
+            case ButtonNames.StampSpotMiddle:
+            case ButtonNames.StampSpotRight:
+            case ButtonNames.StampSpotDownLeft:
+            case ButtonNames.StampSpotDownRight:
+            case ButtonNames.StampSpotDown:
+                if (currentPhase != ModulePhase.Stamp) return;
+                StampInGrid(index - 5);
                 break;
-            case (3):
-                currentStampColor[(int)ButtonNames.StampLeft] += 1;
-                Debug.Log(currentStampColor[(int)ButtonNames.StampLeft]);
-                if (currentStampColor[(int)ButtonNames.StampLeft] >= Colors.Length)
-                {
-                    currentStampColor[(int)ButtonNames.StampLeft] = 0;
-                }
-                Stamp[(int)ButtonNames.StampLeft].GetComponent<MeshRenderer>().material = Colors[currentStampColor[(int)ButtonNames.StampLeft]];
-                Audio.PlaySoundAtTransform(Sounds[currentStampColor[(int)ButtonNames.StampLeft]], transform);
+            case ButtonNames.Q1Top:
                 break;
+            case ButtonNames.Q1Down:
+                break;
+            case ButtonNames.Q1Left:
+                break;
+            case ButtonNames.Q1Right:
+                break;
+            case ButtonNames.Q2Top:
+                break;
+            case ButtonNames.Q2Down:
+                break;
+            case ButtonNames.Q2Left:
+                break;
+            case ButtonNames.Q2Right:
+                break;
+            case ButtonNames.Q3Top:
+                break;
+            case ButtonNames.Q3Down:
+                break;
+            case ButtonNames.Q3Left:
+                break;
+            case ButtonNames.Q3Right:
+                break;
+            case ButtonNames.Q4Top:
+                break;
+            case ButtonNames.Q4Down:
+                break;
+            case ButtonNames.Q4Left:
+                break;
+            case ButtonNames.Q4Right:
+                break;
+            case ButtonNames.ResetButton:
+                if (currentPhase != ModulePhase.Stamp) return;
+                ResetStampPhase();
+                break;
+            case ButtonNames.Submit:
+                CheckCurrentPhase();
+                break;
+
+            //Default if exceptions happen at some point
             default:
+                Debug.Log("Unhandled button index: " + index);
+                break;
+        }
+    }
+    #endregion
+
+    #region Stamp Logic
+    void ChangeStampIndex(int index)
+    {
+        if (currentPhase != ModulePhase.Gray) { return; }
+
+        if (index < 0 || index >= currentStampColor.Length)
+        {
+            Debug.Log("An Error accrued when trying to index the 'Stamp' location, invalid value: " + index);
+            return;
+        }
+
+        currentStampColor[index] = (currentStampColor[index] + 1) % unlitColors.Length;
+
+        Debug.Log("Stamp " + index + " changed color to " + currentStampColor[index]);
+
+        ChangeStampColor();
+
+        Playsound((SoundeffectNames)currentStampColor[index]);
+    }
+
+    void ChangeStampColor()
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            if (currentStampColor[i] < 0)
+            {
+                stampRenderer[i].material = NoColor;
+                continue;
+            }
+            stampRenderer[i].material = unlitColors[currentStampColor[i]];
+        }
+    }
+
+    void RotateStamp(int buttonIndex)
+    {
+        int[] newColors = new int[4];
+        if (buttonIndex == (int)ButtonNames.RotateCW)
+        {
+            newColors[0] = currentStampColor[3];
+            newColors[1] = currentStampColor[0];
+            newColors[2] = currentStampColor[1];
+            newColors[3] = currentStampColor[2];
+        }
+        else
+        {
+            newColors[0] = currentStampColor[1];
+            newColors[1] = currentStampColor[2];
+            newColors[2] = currentStampColor[3];
+            newColors[3] = currentStampColor[0];
+        }
+        currentStampColor = newColors;
+        ChangeStampColor();
+    }
+
+    void GetCorrectStampColors()
+    {
+        for (int index = 0; index < QColors.Count; index++)
+        {
+            int column = GetTableColumn(index);
+            int row = GetTableRow(index);
+            Debug.Log($"StampPos {index}: Row={row + 1}, Col={column + 1}, Color={stampTable[row, column].name}");
+            correctStamp.Add(stampTable[row, column]);
+        }
+        oldStamp = currentStampColor;
+    }
+
+    void StampInGrid(int pip)
+    {
+        switch (pip)
+        {
+            case 1:
+                gridRenderers[0].material = stampRenderer[0].sharedMaterial;
+                gridRenderers[2].material = stampRenderer[1].sharedMaterial;
+                gridRenderers[4].material = stampRenderer[2].sharedMaterial;
+                gridRenderers[1].material = stampRenderer[3].sharedMaterial;
+                break;
+            case 2:
+                gridRenderers[1].material = stampRenderer[0].sharedMaterial;
+                gridRenderers[4].material = stampRenderer[1].sharedMaterial;
+                gridRenderers[7].material = stampRenderer[2].sharedMaterial;
+                gridRenderers[3].material = stampRenderer[3].sharedMaterial;
+                break;
+            case 3:
+                gridRenderers[3].material = stampRenderer[0].sharedMaterial;
+                gridRenderers[7].material = stampRenderer[1].sharedMaterial;
+                gridRenderers[10].material = stampRenderer[2].sharedMaterial;
+                gridRenderers[6].material = stampRenderer[3].sharedMaterial;
+                break;
+            case 4:
+                gridRenderers[7].material = stampRenderer[0].sharedMaterial;
+                gridRenderers[11].material = stampRenderer[1].sharedMaterial;
+                gridRenderers[13].material = stampRenderer[2].sharedMaterial;
+                gridRenderers[10].material = stampRenderer[3].sharedMaterial;
+                break;
+            case 5:
+                gridRenderers[11].material = stampRenderer[0].sharedMaterial;
+                gridRenderers[14].material = stampRenderer[1].sharedMaterial;
+                gridRenderers[15].material = stampRenderer[2].sharedMaterial;
+                gridRenderers[13].material = stampRenderer[3].sharedMaterial;
+                break;
+            case 6:
+                gridRenderers[8].material = stampRenderer[0].sharedMaterial;
+                gridRenderers[12].material = stampRenderer[1].sharedMaterial;
+                gridRenderers[14].material = stampRenderer[2].sharedMaterial;
+                gridRenderers[11].material = stampRenderer[3].sharedMaterial;
+                break;
+            case 7:
+                gridRenderers[5].material = stampRenderer[0].sharedMaterial;
+                gridRenderers[9].material = stampRenderer[1].sharedMaterial;
+                gridRenderers[12].material = stampRenderer[2].sharedMaterial;
+                gridRenderers[8].material = stampRenderer[3].sharedMaterial;
+                break;
+            case 8:
+                gridRenderers[2].material = stampRenderer[0].sharedMaterial;
+                gridRenderers[5].material = stampRenderer[1].sharedMaterial;
+                gridRenderers[8].material = stampRenderer[2].sharedMaterial;
+                gridRenderers[4].material = stampRenderer[3].sharedMaterial;
+                break;
+            case 9:
+                gridRenderers[4].material = stampRenderer[0].sharedMaterial;
+                gridRenderers[8].material = stampRenderer[1].sharedMaterial;
+                gridRenderers[11].material = stampRenderer[2].sharedMaterial;
+                gridRenderers[7].material = stampRenderer[3].sharedMaterial;
                 break;
         }
     }
 
-    void InputHandler(KMSelectable button)
+    void ResetStampPhase()
     {
-        for (int i = 0; i < Buttons.Length; i++)
+        currentStampColor = oldStamp;
+        ChangeStampColor();
+        foreach (MeshRenderer tile in gridRenderers)
         {
-            if(button == Buttons[i])
+            tile.material = NoColor;
+        }
+        Playsound(SoundeffectNames.RotateCCW);
+    }
+
+    void GenerateStampPositions()
+    {
+        HashSet<int> used = new HashSet<int>();
+        List<List<int>> sequences = new List<List<int>>();
+        foreach (int i in currentStampColor)
+        {
+            sequences.Add(StampOrderLists[(ColorNames)i]);
+        }
+
+        for (int pos = 0; stampOrder.Count < 9 ; pos++)
+        {
+            List<int> candidates = new List<int>();
+
+            foreach (var i in sequences)
             {
-                switch (i)
+                if (pos < i.Count && !used.Contains(i[pos]))
+                    candidates.Add(i[pos]);
+            }
+
+            if (candidates.Count > 0)
+            {
+                int min = candidates.Min();
+                stampOrder.Add(min);
+                used.Add(min);
+            }
+            else
+            {
+                for (int n = 1; n <= 9; n++)
                 {
-                    case ((int)ButtonNames.StampTop):
-                        ChangeColorStamp((int)ButtonNames.StampTop);
+                    if (!used.Contains(n))
+                    {
+                        stampOrder.Add(n);
+                        used.Add(n);
                         break;
-                    case ((int)ButtonNames.StampRight):
-                        ChangeColorStamp((int)ButtonNames.StampRight);
-                        break;
-                    case ((int)ButtonNames.StampDown):
-                        ChangeColorStamp((int)ButtonNames.StampDown);
-                        break;
-                    case ((int)ButtonNames.StampLeft):
-                        ChangeColorStamp((int)ButtonNames.StampLeft);
-                        break;
-                    case ((int)ButtonNames.RotateCW):
-                        Audio.PlaySoundAtTransform(Sounds[8], transform);
-                        break;
-                    case ((int)ButtonNames.RotateCCW):
-                        Audio.PlaySoundAtTransform(Sounds[9], transform);
-                        break;
-                    default:
-                        break;
+                    }
                 }
             }
         }
+        for (int i = 0; i < stampOrder.Count; i++)
+        {
+            Debug.Log(stampOrder[i]);
+        }
     }
 
-    IEnumerator CheckBigGridAnimation()
+    #endregion
+
+    #region Grid & Color Logic
+    void GenerateGrayscale()
     {
-        Audio.PlaySoundAtTransform(Sounds[10], transform);
-        for (int i = 0; i < GridTiles.Count; i++)
+        Grayscale = new Material[0];
+        for (int i = 0; i < 4; i++)
+            Grayscale = Grayscale.AddRangeToArray(Grays);
+        Grayscale = Grayscale.Shuffle();
+    }
+
+    void FillQuadrantsWithCurrentColor()
+    {
+        QColors = new Dictionary<int, List<Material>>();
+        for (int i = 0; i < 4; i++)
+            QColors[i] = new List<Material>();
+
+        foreach (GameObject go in GridTiles)
         {
-            GridTiles[i].GetComponent<MeshRenderer>().material = AnimationWhite;
-            yield return new WaitForSeconds(.122f);
-            GridTiles[i].GetComponent<MeshRenderer>().material = NoColor;
+            Material mat = go.GetComponent<MeshRenderer>().material;
+            if (go.name.Contains("Q1")) QColors[0].Add(mat);
+            else if (go.name.Contains("Q2")) QColors[1].Add(mat);
+            else if (go.name.Contains("Q3")) QColors[2].Add(mat);
+            else QColors[3].Add(mat);
         }
-        yield return null;
+    }
+
+    int GetTableColumn(int index)
+    {
+        var counts = QColors[index]
+            .GroupBy(m => m.name)
+            .Select(g => g.Count())
+            .OrderByDescending(c => c)
+            .ToList();
+
+        if (counts.Contains(4)) { twoPair = false; return 3; }
+        if (counts.Contains(3)) { twoPair = false; return 2; }
+        if (counts.Contains(2) && counts.Count == 2) { twoPair = true; return 1; }
+        if (counts.Contains(2)) { twoPair = false; return 1; }
+
+        twoPair = false;
+        return 0;
+    }
+
+    int GetTableRow(int index)
+    {
+        var otherMats = QColors.Where(kvp => kvp.Key != index).SelectMany(kvp => kvp.Value).ToList();
+        var mostFrequent = ZList.GetMostFrequentBy(otherMats, mat => mat.name);
+        Func<Material, int> grayscaleIndex = m => Array.FindIndex(Grays, g => g.color == m.color);
+
+        mostFrequent = twoPair
+            ? mostFrequent.OrderByDescending(grayscaleIndex).ToList()
+            : mostFrequent.OrderBy(grayscaleIndex).ToList();
+
+        return grayscaleIndex(mostFrequent.First());
+    }
+
+    void GetCorrectGridColors()
+    {
+        ColoredGrid = new List<Material>(new Material[gridRenderers.Length]); // 16 tiles
+        int[] simulatedStamp = (int[])currentStampColor.Clone(); // Start with correct stamp
+        int[] rotation = new int[] { 0, 1, 2, 3 }; // top, right, down, left indices
+
+        foreach (int pip in stampOrder)
+        {
+            // Place the stamp at the pip location
+            PlaceStampInSimulatedGrid(pip, simulatedStamp, rotation);
+
+            // Determine rotation direction
+            if (pip % 2 == 0)
+            {
+                // Even → CW rotation
+                rotation = new int[] {
+                rotation[3],
+                rotation[0],
+                rotation[1],
+                rotation[2]
+            };
+            }
+            else
+            {
+                // Odd → CCW rotation
+                rotation = new int[] {
+                rotation[1],
+                rotation[2],
+                rotation[3],
+                rotation[0]
+            };
+            }
+        }
+    }
+    void PlaceStampInSimulatedGrid(int pip, int[] simulatedStamp, int[] rotation)
+    {
+        int top = simulatedStamp[rotation[0]];
+        int right = simulatedStamp[rotation[1]];
+        int bottom = simulatedStamp[rotation[2]];
+        int left = simulatedStamp[rotation[3]];
+
+        switch (pip)
+        {
+            case 1:
+                AssignGrid(0, top);
+                AssignGrid(2, right);
+                AssignGrid(4, bottom);
+                AssignGrid(1, left);
+                break;
+            case 2:
+                AssignGrid(1, top);
+                AssignGrid(4, right);
+                AssignGrid(7, bottom);
+                AssignGrid(3, left);
+                break;
+            case 3:
+                AssignGrid(3, top);
+                AssignGrid(7, right);
+                AssignGrid(10, bottom);
+                AssignGrid(6, left);
+                break;
+            case 4:
+                AssignGrid(7, top);
+                AssignGrid(11, right);
+                AssignGrid(13, bottom);
+                AssignGrid(10, left);
+                break;
+            case 5:
+                AssignGrid(11, top);
+                AssignGrid(14, right);
+                AssignGrid(15, bottom);
+                AssignGrid(13, left);
+                break;
+            case 6:
+                AssignGrid(8, top);
+                AssignGrid(12, right);
+                AssignGrid(14, bottom);
+                AssignGrid(11, left);
+                break;
+            case 7:
+                AssignGrid(5, top);
+                AssignGrid(9, right);
+                AssignGrid(12, bottom);
+                AssignGrid(8, left);
+                break;
+            case 8:
+                AssignGrid(2, top);
+                AssignGrid(5, right);
+                AssignGrid(8, bottom);
+                AssignGrid(4, left);
+                break;
+            case 9:
+                AssignGrid(4, top);
+                AssignGrid(8, right);
+                AssignGrid(11, bottom);
+                AssignGrid(7, left);
+                break;
+        }
+    }
+    void AssignGrid(int gridIndex, int colorIndex)
+    {
+        if (ColoredGrid[gridIndex] == null)
+            ColoredGrid[gridIndex] = unlitColors[colorIndex];
+        else
+            ColoredGrid[gridIndex] = unlitColors[colorIndex];
+    }
+    void GridToUnlit()
+    {
+        for (int i = 0; i < gridRenderers.Length; i++)
+        {
+
+            int index = Array.IndexOf(litColors, gridRenderers[i].sharedMaterial);
+            if (index != -1)
+            {
+                gridRenderers[i].material = unlitColors[index];
+                continue;
+            }
+            return;
+        }
+    }
+    #endregion
+
+    #region Simon Logic
+
+    void GenerateSimonPhase()
+    {
+        playedSimonPhase = GridTiles.Shuffle().Take(5).ToList();
+    }
+
+    void GetCorrectSimonAnswer()
+    {
+
+    }
+
+    #endregion
+
+    #region Audio & Control
+    void CheckCurrentPhase()
+    {
+        switch (currentPhase)
+        {
+            case ModulePhase.Gray:
+                if (CheckStampIsRunning || currentStampColor.Contains(-1)) return;
+                StartCoroutine(CheckStampAnimation());
+                break;
+            case ModulePhase.Stamp:
+                if (CheckGridIsRunning || gridRenderers.Select(r => r.sharedMaterial).Contains(NoColor)) return;
+                StartCoroutine(CheckGridAnimation());
+                break;
+            case ModulePhase.Simon:
+                break;
+            default:
+                Debug.Log("Current phase is undefined!");
+                break;
+        }
+    }
+
+    void Playsound(SoundeffectNames sound)
+    {
+        string clipName = sound.ToString();
+        try
+        {
+            Audio.PlaySoundAtTransform(clipName, ModuleTransform);
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning($"Sound clip '{clipName}' failed to play. Exception: {e.Message}");
+        }
     }
 
     void Solve()
@@ -201,9 +783,13 @@ public class UncoloredSimon : MonoBehaviour
 
     void Strike()
     {
+        Playsound(SoundeffectNames.ShortFail);
         GetComponent<KMBombModule>().HandleStrike();
     }
-    /* Delete this if you dont want TP integration
+    #endregion
+
+    #region Twitch Plays
+    /* Uncomment if needed
 #pragma warning disable 414
     private readonly string TwitchHelpMessage = @"Use !{0} to do something.";
 #pragma warning restore 414
@@ -216,5 +802,7 @@ public class UncoloredSimon : MonoBehaviour
     IEnumerator TwitchHandleForcedSolve()
     {
         yield return null;
-    }*/
+    }
+    */
+    #endregion
 }
