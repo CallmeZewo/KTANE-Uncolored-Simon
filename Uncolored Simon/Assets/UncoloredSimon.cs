@@ -3,13 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using KModkit;
-using Rnd = UnityEngine.Random;
-using Math = ExMath;
-using HarmonyLib;
-using static UnityEditor.Graphs.Styles;
-using UnityEditor;
-using static UnityEditor.Experimental.Build.AssetBundle.BuildOutput;
 
 public class UncoloredSimon : MonoBehaviour
 {
@@ -34,6 +27,7 @@ public class UncoloredSimon : MonoBehaviour
     bool CheckStampIsRunning = false;
     bool playSimon = false;
     bool CheckGridIsRunning = false;
+    bool Solved = false;
     ModulePhase currentPhase = ModulePhase.Gray;
 
     int[] currentStampColor = new int[] { -1, -1, -1, -1 };
@@ -44,6 +38,8 @@ public class UncoloredSimon : MonoBehaviour
     MeshRenderer[] stampRenderer;
     List<int> stampOrder = new List<int>();
     List<GameObject> playedSimonPhase = new List<GameObject>();
+    List<string> SimonPhaseAnswer = new List<string>();
+    List<string> SimonPhaseAnswerClone = new List<string>();
     List<Material> ColoredGrid = new List<Material>();
     List<Material> correctStamp = new List<Material>();
     Material[] Grayscale;
@@ -51,11 +47,17 @@ public class UncoloredSimon : MonoBehaviour
     #endregion
 
     #region Enums
+    enum PosInQuadrant
+    {
+        Top, Right, Down, Left
+    }
     enum ModulePhase
     {
         Gray,
         Stamp,
-        Simon
+        Simon1,
+        Simon2,
+        Simon3,
     }
     enum ColorNames
     {
@@ -209,7 +211,7 @@ public class UncoloredSimon : MonoBehaviour
             CheckGridIsRunning = false;
             yield break;
         }
-        currentPhase = ModulePhase.Simon;
+        currentPhase = ModulePhase.Simon1;
         CheckGridIsRunning = false;
         Playsound(SoundeffectNames.ShortCorrect);
         GridToUnlit();
@@ -217,6 +219,7 @@ public class UncoloredSimon : MonoBehaviour
         {
             mr.material = NoColor;
         }
+        FillQuadrantsWithCurrentColor();
         GenerateSimonPhase();
         playSimon = true;
         yield return new WaitForSeconds(1.5f);
@@ -236,7 +239,8 @@ public class UncoloredSimon : MonoBehaviour
     {
         foreach (GameObject Obj in playedSimonPhase)
         {
-            int index = Array.IndexOf(unlitColors, Obj.GetComponent<MeshRenderer>().sharedMaterial);
+            Material currentMat = Obj.GetComponent<MeshRenderer>().sharedMaterial;
+            int index = Array.FindIndex(unlitColors, m => m.color == currentMat.color);
             Obj.GetComponent<MeshRenderer>().material = litColors[index];
             Playsound((SoundeffectNames)index);
             yield return new WaitForSeconds(.8f);
@@ -260,8 +264,9 @@ public class UncoloredSimon : MonoBehaviour
     #region Input Handling
     void InputHandler(KMSelectable button)
     {
+        if (Solved) return;
         //Simon Phase play handler
-        if (currentPhase == ModulePhase.Simon)
+        if (currentPhase >= ModulePhase.Simon1)
         {
             foreach (GameObject Obj in playedSimonPhase)
             {
@@ -320,42 +325,31 @@ public class UncoloredSimon : MonoBehaviour
                 StampInGrid(index - 5);
                 break;
             case ButtonNames.Q1Top:
-                break;
             case ButtonNames.Q1Down:
-                break;
             case ButtonNames.Q1Left:
-                break;
             case ButtonNames.Q1Right:
-                break;
             case ButtonNames.Q2Top:
-                break;
             case ButtonNames.Q2Down:
-                break;
             case ButtonNames.Q2Left:
-                break;
             case ButtonNames.Q2Right:
-                break;
             case ButtonNames.Q3Top:
-                break;
             case ButtonNames.Q3Down:
-                break;
             case ButtonNames.Q3Left:
-                break;
             case ButtonNames.Q3Right:
-                break;
             case ButtonNames.Q4Top:
-                break;
             case ButtonNames.Q4Down:
-                break;
             case ButtonNames.Q4Left:
-                break;
             case ButtonNames.Q4Right:
+                if (currentPhase < ModulePhase.Simon1) return;
+                Debug.Log("sss");
+                InputSimonPhase(btn);
                 break;
             case ButtonNames.ResetButton:
                 if (currentPhase != ModulePhase.Stamp) return;
                 ResetStampPhase();
                 break;
             case ButtonNames.Submit:
+                if (currentPhase >= ModulePhase.Simon1) return;
                 CheckCurrentPhase();
                 break;
 
@@ -556,7 +550,7 @@ public class UncoloredSimon : MonoBehaviour
     {
         Grayscale = new Material[0];
         for (int i = 0; i < 4; i++)
-            Grayscale = Grayscale.AddRangeToArray(Grays);
+            Grayscale = Grayscale.Concat(Grays).ToArray();
         Grayscale = Grayscale.Shuffle();
     }
 
@@ -565,6 +559,22 @@ public class UncoloredSimon : MonoBehaviour
         QColors = new Dictionary<int, List<Material>>();
         for (int i = 0; i < 4; i++)
             QColors[i] = new List<Material>();
+
+        string[] quadrantOrder = { "Q1", "Q2", "Q3", "Q4" };
+        string[] posOrder = { "Top", "Right", "Down", "Left" };
+
+        GridTiles = GridTiles
+            .OrderBy(tile =>
+            {
+                string name = tile.name;
+
+                int quadIndex = Array.FindIndex(quadrantOrder, q => name.Contains(q));
+                int posIndex = Array.FindIndex(posOrder, p => name.Contains(p));
+
+                // Use combined weight to sort: Q1Top < Q1Right < Q1Down < ...
+                return quadIndex * 4 + posIndex;
+            })
+            .ToList();
 
         foreach (GameObject go in GridTiles)
         {
@@ -733,13 +743,100 @@ public class UncoloredSimon : MonoBehaviour
     void GenerateSimonPhase()
     {
         playedSimonPhase = GridTiles.Shuffle().Take(5).ToList();
+        GetCorrectSimonAnswer();
     }
 
     void GetCorrectSimonAnswer()
     {
+        List<PosInQuadrant> posInQuadrants = new List<PosInQuadrant>();
+        List<ColorNames> colors = new List<ColorNames>();
+        SimonPhaseAnswer.Clear();
 
+        foreach (GameObject go in playedSimonPhase)
+        {
+            // Invert position in quadrant
+            string pos = go.name;
+            if (pos.Contains("Top")) posInQuadrants.Add(PosInQuadrant.Down);
+            else if (pos.Contains("Right")) posInQuadrants.Add(PosInQuadrant.Left);
+            else if (pos.Contains("Down")) posInQuadrants.Add(PosInQuadrant.Top);
+            else posInQuadrants.Add(PosInQuadrant.Right);
+
+            // Extract color from material name
+            string color = go.GetComponent<MeshRenderer>().material.name;
+            if (color.Contains("Blue")) colors.Add(ColorNames.Blue);
+            else if (color.Contains("Brown")) colors.Add(ColorNames.Brown);
+            else if (color.Contains("Cyan")) colors.Add(ColorNames.Cyan);
+            else if (color.Contains("Green")) colors.Add(ColorNames.Green);
+            else if (color.Contains("Magenta")) colors.Add(ColorNames.Magenta);
+            else if (color.Contains("Purple")) colors.Add(ColorNames.Purple);
+            else if (color.Contains("Red")) colors.Add(ColorNames.Red);
+            else colors.Add(ColorNames.Yellow);
+        }
+
+        colors.Reverse();
+
+        for (int i = 0; i < 5; i++)
+        {
+            PosInQuadrant startPos = posInQuadrants[i];
+            ColorNames color = colors[i];
+            int currentQuadrant = (int)startPos;
+
+            bool clockwise = color == ColorNames.Red || color == ColorNames.Blue || color == ColorNames.Yellow;
+            int[] dir = clockwise ? new[] { 0, 1, 2, 3 } : new[] { 0, 3, 2, 1 };
+
+            while (true)
+            {
+                if (!QColors.ContainsKey(currentQuadrant) || QColors[currentQuadrant].Count < 4)
+                    break;
+
+                List<Material> quadrantMats = QColors[currentQuadrant];
+
+                foreach (int d in dir)
+                {
+                    if (quadrantMats[d].name.ToLower().Contains(color.ToString().ToLower()))
+                    {
+                        string quadStr = $"Q{currentQuadrant + 1}";
+                        string[] posNames = { "Top", "Right", "Down", "Left" };
+                        string targetName = quadStr + posNames[d];
+
+                        GameObject target = GridTiles.FirstOrDefault(g => g.name == targetName);
+                        if (target != null)
+                            SimonPhaseAnswer.Add(target.name);
+
+                        goto Next;
+                    }
+                }
+
+                currentQuadrant = clockwise ? (currentQuadrant + 1) % 4 : (currentQuadrant + 3) % 4;
+            }
+
+        Next:;
+        }
+        foreach (string i in SimonPhaseAnswer) Debug.Log(i);
     }
 
+    void InputSimonPhase(ButtonNames buttonName)
+    {
+        string btn = buttonName.ToString();
+        if (SimonPhaseAnswerClone.Count == 0)
+        {
+            SimonPhaseAnswerClone = SimonPhaseAnswer.ToList();
+        }
+        if (btn == SimonPhaseAnswerClone.First())
+        {
+            SimonPhaseAnswerClone.Remove(btn);
+        }
+        else
+        {
+            Strike();
+            SimonPhaseAnswerClone = SimonPhaseAnswer.ToList();
+            return;
+        }
+        if (SimonPhaseAnswerClone.Count == 0)
+        {
+            CheckCurrentPhase();
+        }
+    }
     #endregion
 
     #region Audio & Control
@@ -755,7 +852,18 @@ public class UncoloredSimon : MonoBehaviour
                 if (CheckGridIsRunning || gridRenderers.Select(r => r.sharedMaterial).Contains(NoColor)) return;
                 StartCoroutine(CheckGridAnimation());
                 break;
-            case ModulePhase.Simon:
+            case ModulePhase.Simon1:
+                currentPhase = ModulePhase.Simon2;
+                Playsound(SoundeffectNames.ShortCorrect);
+                GenerateSimonPhase();
+                break;
+            case ModulePhase.Simon2:
+                currentPhase = ModulePhase.Simon3;
+                Playsound(SoundeffectNames.ShortCorrect);
+                GenerateSimonPhase();
+                break;
+            case ModulePhase.Simon3:
+                Solve();
                 break;
             default:
                 Debug.Log("Current phase is undefined!");
@@ -778,6 +886,9 @@ public class UncoloredSimon : MonoBehaviour
 
     void Solve()
     {
+        Playsound(SoundeffectNames.LongCorrect);
+        Solved = true;
+        playSimon = false;
         GetComponent<KMBombModule>().HandlePass();
     }
 
