@@ -113,12 +113,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!114 &49058537 stripped
-MonoBehaviour:
-  m_PrefabParentObject: {fileID: 114769075776155054, guid: dc268705df62e7643bdbe00bcea11a82,
-    type: 2}
-  m_PrefabInternal: {fileID: 2120441985}
-  m_Script: {fileID: 1702003387, guid: 45b809be76fd7a3468b6f517bced6f28, type: 3}
 --- !u!1001 &781243860
 Prefab:
   m_ObjectHideFlags: 0
@@ -306,11 +300,6 @@ Prefab:
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 8814ea52310d2614a9feda02ec355ae4, type: 2}
   m_IsPrefabParent: 0
---- !u!64 &935630843 stripped
-MeshCollider:
-  m_PrefabParentObject: {fileID: 64096515685940192, guid: dc268705df62e7643bdbe00bcea11a82,
-    type: 2}
-  m_PrefabInternal: {fileID: 2120441985}
 --- !u!1 &1706330382
 GameObject:
   m_ObjectHideFlags: 0
@@ -464,11 +453,6 @@ Prefab:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 114089336561730772, guid: dc268705df62e7643bdbe00bcea11a82,
-        type: 2}
-      propertyPath: SelectableColliders.Array.size
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 4799546364725194, guid: dc268705df62e7643bdbe00bcea11a82, type: 2}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -501,176 +485,6 @@ Prefab:
       propertyPath: m_RootOrder
       value: 3
       objectReference: {fileID: 0}
-    - target: {fileID: 114089336561730772, guid: dc268705df62e7643bdbe00bcea11a82,
-        type: 2}
-      propertyPath: SelectableColliders.Array.data[0]
-      value: 
-      objectReference: {fileID: 935630843}
-    - target: {fileID: 114942860613532446, guid: dc268705df62e7643bdbe00bcea11a82,
-        type: 2}
-      propertyPath: Parent
-      value: 
-      objectReference: {fileID: 49058537}
-    - target: {fileID: 114452053276635126, guid: dc268705df62e7643bdbe00bcea11a82,
-        type: 2}
-      propertyPath: Parent
-      value: 
-      objectReference: {fileID: 49058537}
-    - target: {fileID: 114655546896191368, guid: dc268705df62e7643bdbe00bcea11a82,
-        type: 2}
-      propertyPath: Parent
-      value: 
-      objectReference: {fileID: 49058537}
-    - target: {fileID: 114636917888645320, guid: dc268705df62e7643bdbe00bcea11a82,
-        type: 2}
-      propertyPath: Parent
-      value: 
-      objectReference: {fileID: 49058537}
-    - target: {fileID: 114310148879387924, guid: dc268705df62e7643bdbe00bcea11a82,
-        type: 2}
-      propertyPath: Parent
-      value: 
-      objectReference: {fileID: 49058537}
-    - target: {fileID: 114989285112037006, guid: dc268705df62e7643bdbe00bcea11a82,
-        type: 2}
-      propertyPath: Parent
-      value: 
-      objectReference: {fileID: 49058537}
-    - target: {fileID: 114997733399107836, guid: dc268705df62e7643bdbe00bcea11a82,
-        type: 2}
-      propertyPath: Parent
-      value: 
-      objectReference: {fileID: 49058537}
-    - target: {fileID: 114089336561730772, guid: dc268705df62e7643bdbe00bcea11a82,
-        type: 2}
-      propertyPath: Parent
-      value: 
-      objectReference: {fileID: 49058537}
-    - target: {fileID: 114378482384225658, guid: dc268705df62e7643bdbe00bcea11a82,
-        type: 2}
-      propertyPath: Parent
-      value: 
-      objectReference: {fileID: 49058537}
-    - target: {fileID: 114374386948158678, guid: dc268705df62e7643bdbe00bcea11a82,
-        type: 2}
-      propertyPath: Parent
-      value: 
-      objectReference: {fileID: 49058537}
-    - target: {fileID: 114407401446671090, guid: dc268705df62e7643bdbe00bcea11a82,
-        type: 2}
-      propertyPath: Parent
-      value: 
-      objectReference: {fileID: 49058537}
-    - target: {fileID: 114879996937577306, guid: dc268705df62e7643bdbe00bcea11a82,
-        type: 2}
-      propertyPath: Parent
-      value: 
-      objectReference: {fileID: 49058537}
-    - target: {fileID: 114809453159617194, guid: dc268705df62e7643bdbe00bcea11a82,
-        type: 2}
-      propertyPath: Parent
-      value: 
-      objectReference: {fileID: 49058537}
-    - target: {fileID: 114227836721691318, guid: dc268705df62e7643bdbe00bcea11a82,
-        type: 2}
-      propertyPath: Parent
-      value: 
-      objectReference: {fileID: 49058537}
-    - target: {fileID: 114761497909590934, guid: dc268705df62e7643bdbe00bcea11a82,
-        type: 2}
-      propertyPath: Parent
-      value: 
-      objectReference: {fileID: 49058537}
-    - target: {fileID: 114321070573919342, guid: dc268705df62e7643bdbe00bcea11a82,
-        type: 2}
-      propertyPath: Parent
-      value: 
-      objectReference: {fileID: 49058537}
-    - target: {fileID: 114674225090392110, guid: dc268705df62e7643bdbe00bcea11a82,
-        type: 2}
-      propertyPath: Parent
-      value: 
-      objectReference: {fileID: 49058537}
-    - target: {fileID: 114232319493283256, guid: dc268705df62e7643bdbe00bcea11a82,
-        type: 2}
-      propertyPath: Parent
-      value: 
-      objectReference: {fileID: 49058537}
-    - target: {fileID: 114435669688516620, guid: dc268705df62e7643bdbe00bcea11a82,
-        type: 2}
-      propertyPath: Parent
-      value: 
-      objectReference: {fileID: 49058537}
-    - target: {fileID: 114691299197891464, guid: dc268705df62e7643bdbe00bcea11a82,
-        type: 2}
-      propertyPath: Parent
-      value: 
-      objectReference: {fileID: 49058537}
-    - target: {fileID: 114430221577661078, guid: dc268705df62e7643bdbe00bcea11a82,
-        type: 2}
-      propertyPath: Parent
-      value: 
-      objectReference: {fileID: 49058537}
-    - target: {fileID: 114084538032380398, guid: dc268705df62e7643bdbe00bcea11a82,
-        type: 2}
-      propertyPath: Parent
-      value: 
-      objectReference: {fileID: 49058537}
-    - target: {fileID: 114059889282888524, guid: dc268705df62e7643bdbe00bcea11a82,
-        type: 2}
-      propertyPath: Parent
-      value: 
-      objectReference: {fileID: 49058537}
-    - target: {fileID: 114884230434697376, guid: dc268705df62e7643bdbe00bcea11a82,
-        type: 2}
-      propertyPath: Parent
-      value: 
-      objectReference: {fileID: 49058537}
-    - target: {fileID: 114843657010418348, guid: dc268705df62e7643bdbe00bcea11a82,
-        type: 2}
-      propertyPath: Parent
-      value: 
-      objectReference: {fileID: 49058537}
-    - target: {fileID: 114121506356825660, guid: dc268705df62e7643bdbe00bcea11a82,
-        type: 2}
-      propertyPath: Parent
-      value: 
-      objectReference: {fileID: 49058537}
-    - target: {fileID: 114296764876671630, guid: dc268705df62e7643bdbe00bcea11a82,
-        type: 2}
-      propertyPath: Parent
-      value: 
-      objectReference: {fileID: 49058537}
-    - target: {fileID: 114770753783741176, guid: dc268705df62e7643bdbe00bcea11a82,
-        type: 2}
-      propertyPath: Parent
-      value: 
-      objectReference: {fileID: 49058537}
-    - target: {fileID: 114377067534379372, guid: dc268705df62e7643bdbe00bcea11a82,
-        type: 2}
-      propertyPath: Parent
-      value: 
-      objectReference: {fileID: 49058537}
-    - target: {fileID: 114758100457380914, guid: dc268705df62e7643bdbe00bcea11a82,
-        type: 2}
-      propertyPath: Parent
-      value: 
-      objectReference: {fileID: 49058537}
-    - target: {fileID: 114878395783109772, guid: dc268705df62e7643bdbe00bcea11a82,
-        type: 2}
-      propertyPath: Parent
-      value: 
-      objectReference: {fileID: 49058537}
-    - target: {fileID: 114981652862258438, guid: dc268705df62e7643bdbe00bcea11a82,
-        type: 2}
-      propertyPath: Parent
-      value: 
-      objectReference: {fileID: 49058537}
-    - target: {fileID: 114492438491611020, guid: dc268705df62e7643bdbe00bcea11a82,
-        type: 2}
-      propertyPath: Parent
-      value: 
-      objectReference: {fileID: 49058537}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: dc268705df62e7643bdbe00bcea11a82, type: 2}
   m_IsPrefabParent: 0

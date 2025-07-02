@@ -341,7 +341,9 @@ public class UncoloredSimon : MonoBehaviour
             case ButtonNames.Q4Left:
             case ButtonNames.Q4Right:
                 if (currentPhase < ModulePhase.Simon1) return;
-                Debug.Log("sss");
+                GameObject pressedButton = Buttons[index].gameObject;
+                int colorIndexOfButton = Array.IndexOf(unlitColors.Select(c => c.color).ToArray(), pressedButton.GetComponent<MeshRenderer>().material.color);
+                Playsound((SoundeffectNames)colorIndexOfButton);
                 InputSimonPhase(btn);
                 break;
             case ButtonNames.ResetButton:
@@ -375,6 +377,8 @@ public class UncoloredSimon : MonoBehaviour
         currentStampColor[index] = (currentStampColor[index] + 1) % unlitColors.Length;
 
         Debug.Log("Stamp " + index + " changed color to " + currentStampColor[index]);
+
+        oldStamp = currentStampColor;
 
         ChangeStampColor();
 
@@ -424,7 +428,9 @@ public class UncoloredSimon : MonoBehaviour
             Debug.Log($"StampPos {index}: Row={row + 1}, Col={column + 1}, Color={stampTable[row, column].name}");
             correctStamp.Add(stampTable[row, column]);
         }
-        oldStamp = currentStampColor;
+        Debug.LogFormat("[Uncolored Simon #{0}] Correct stamp colors selected: {1}", ModuleId,
+        string.Join(", ", correctStamp.Select(c => c.name.Replace(" (Instance)", "").Replace("Unlit", "")).ToArray()));
+
     }
 
     void StampInGrid(int pip)
@@ -541,6 +547,21 @@ public class UncoloredSimon : MonoBehaviour
         {
             Debug.Log(stampOrder[i]);
         }
+
+        //Logging
+        var logParts = new List<string>();
+        for (int i = 0; i < stampOrder.Count; i++)
+        {
+            logParts.Add(stampOrder[i].ToString());
+            if (i < stampOrder.Count - 1)
+            {
+                // Check parity of current number to decide label between current and next
+                logParts.Add(stampOrder[i] % 2 == 0 ? "cw" : "ccw");
+            }
+        }
+
+        Debug.LogFormat("[Uncolored Simon #{0}] Correct pip press sequence: {1}", ModuleId, string.Join(" → ", logParts.ToArray()));
+
     }
 
     #endregion
@@ -743,6 +764,9 @@ public class UncoloredSimon : MonoBehaviour
     void GenerateSimonPhase()
     {
         playedSimonPhase = GridTiles.Shuffle().Take(5).ToList();
+        Debug.LogFormat("[Uncolored Simon #{0}] Simon Phase {1} - Given sequence: {2}", ModuleId,
+        currentPhase,
+        string.Join(" → ", playedSimonPhase.Select(g => g.name).ToArray()));
         GetCorrectSimonAnswer();
     }
 
@@ -813,6 +837,10 @@ public class UncoloredSimon : MonoBehaviour
         Next:;
         }
         foreach (string i in SimonPhaseAnswer) Debug.Log(i);
+
+        Debug.LogFormat("[Uncolored Simon #{0}] Simon Phase {1} - Expected answer: {2}", ModuleId,
+        currentPhase,
+        string.Join(" → ", SimonPhaseAnswer.ToArray()));
     }
 
     void InputSimonPhase(ButtonNames buttonName)
@@ -828,6 +856,9 @@ public class UncoloredSimon : MonoBehaviour
         }
         else
         {
+            Debug.LogFormat("[Uncolored Simon #{0}] Incorrect input: expected '{1}', but got '{2}'. Resetting Simon sequence.", ModuleId,
+            SimonPhaseAnswerClone.First(),
+            btn);
             Strike();
             SimonPhaseAnswerClone = SimonPhaseAnswer.ToList();
             return;
@@ -889,6 +920,7 @@ public class UncoloredSimon : MonoBehaviour
         Playsound(SoundeffectNames.LongCorrect);
         Solved = true;
         playSimon = false;
+        StopAllCoroutines();
         GetComponent<KMBombModule>().HandlePass();
     }
 
