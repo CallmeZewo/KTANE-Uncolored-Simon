@@ -28,6 +28,7 @@ public class UncoloredSimon : MonoBehaviour
     bool playSimon = false;
     bool CheckGridIsRunning = false;
     bool Solved = false;
+    bool buffer = true;    
     ModulePhase currentPhase = ModulePhase.Gray;
 
     int[] currentStampColor = new int[] { -1, -1, -1, -1 };
@@ -253,6 +254,20 @@ public class UncoloredSimon : MonoBehaviour
         }
     }
 
+    IEnumerator LightUpOnClick(int diamondIndex)
+    {
+        if (buffer)
+        {
+            buffer = false;
+            Material diamondMat = Buttons[diamondIndex].GetComponent<MeshRenderer>().material;
+            int index = Array.FindIndex(unlitColors, m => m.color == diamondMat.color);
+            Debug.Log("ahh");
+            Buttons[diamondIndex].GetComponent<MeshRenderer>().material = litColors[index];
+            yield return new WaitForSeconds(.05f);
+            Buttons[diamondIndex].GetComponent<MeshRenderer>().material = unlitColors[index];
+        }
+    }
+
     IEnumerator CheckAFK()
     {
         yield return new WaitForSeconds(3f);
@@ -344,6 +359,8 @@ public class UncoloredSimon : MonoBehaviour
                 GameObject pressedButton = Buttons[index].gameObject;
                 int colorIndexOfButton = Array.IndexOf(unlitColors.Select(c => c.color).ToArray(), pressedButton.GetComponent<MeshRenderer>().material.color);
                 Playsound((SoundeffectNames)colorIndexOfButton);
+                buffer = true;
+                StartCoroutine(LightUpOnClick(index));
                 InputSimonPhase(btn);
                 break;
             case ButtonNames.ResetButton:
@@ -927,6 +944,7 @@ public class UncoloredSimon : MonoBehaviour
     void Strike()
     {
         Playsound(SoundeffectNames.ShortFail);
+        GridToUnlit();
         GetComponent<KMBombModule>().HandleStrike();
     }
     #endregion
