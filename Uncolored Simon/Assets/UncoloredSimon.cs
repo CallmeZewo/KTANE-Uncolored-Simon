@@ -869,7 +869,6 @@ public class UncoloredSimon : MonoBehaviour
 
         Next:;
         }
-        foreach (string i in SimonPhaseAnswer) Debug.Log(i);
 
         Debug.LogFormat("[Uncolored Simon #{0}] Simon Phase {1} - Expected answer: {2}", ModuleId,
         currentPhase,
