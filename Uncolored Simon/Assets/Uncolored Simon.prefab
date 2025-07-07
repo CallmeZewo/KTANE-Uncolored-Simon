@@ -313,6 +313,7 @@ GameObject:
   - component: {fileID: 114428810385081904}
   - component: {fileID: 114797460587858252}
   - component: {fileID: 114869854774708180}
+  - component: {fileID: 114442412953864820}
   - component: {fileID: 114351514030367552}
   m_Layer: 0
   m_Name: Uncolored Simon
@@ -7624,6 +7625,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Bomb: {fileID: 114869854774708180}
   Audio: {fileID: 114797460587858252}
+  Colorblind: {fileID: 114442412953864820}
   ModuleTransform: {fileID: 4799546364725194}
   Buttons:
   - {fileID: 114636917888645320}
@@ -7946,6 +7948,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   HighlightScale: {x: 1, y: 1, z: 1}
   OutlineAmount: 0
+--- !u!114 &114442412953864820
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1226897576497620}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1cfb889a07d5fd4e9baed7960bb397f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _colorblindMode: 0
 --- !u!114 &114447670026415942
 MonoBehaviour:
   m_ObjectHideFlags: 1

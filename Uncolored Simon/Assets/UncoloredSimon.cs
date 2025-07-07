@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using UnityEngine;
 
 public class UncoloredSimon : MonoBehaviour
@@ -212,7 +213,6 @@ public class UncoloredSimon : MonoBehaviour
         {
 
             int index = Array.IndexOf(unlitColors, gridRenderers[i].sharedMaterial);
-            Debug.Log(unlitColors[index]);
             if (ColoredGrid[i].name == unlitColors[index].name)
             {
                 gridRenderers[i].material = litColors[index];
@@ -245,7 +245,7 @@ public class UncoloredSimon : MonoBehaviour
         for (int i = 0; i < 16; i++)
         {
             gridRenderers[i].material = NoColor;
-            yield return new WaitForSeconds(1f / 16f);
+            yield return new WaitForSeconds(.025f);
         }
     }
 
@@ -274,7 +274,6 @@ public class UncoloredSimon : MonoBehaviour
             buffer = false;
             Material diamondMat = Buttons[diamondIndex].GetComponent<MeshRenderer>().material;
             int index = Array.FindIndex(unlitColors, m => m.color == diamondMat.color);
-            Debug.Log("ahh");
             Buttons[diamondIndex].GetComponent<MeshRenderer>().material = litColors[index];
             yield return new WaitForSeconds(.05f);
             Buttons[diamondIndex].GetComponent<MeshRenderer>().material = unlitColors[index];
@@ -1141,7 +1140,7 @@ public class UncoloredSimon : MonoBehaviour
 
             var validPipNames = new[] { "T", "TL", "L", "DL", "D", "DR", "R", "TR", "M" };
 
-            if (validPipNames.Any(x => !x.ContainsIgnoreCase(split[1])))
+            if (validPipNames.All(x => !x.ContainsIgnoreCase(split[1])))
             {
                 yield return $"sendtochaterror {split[1]} is invalid!";
                 yield break;
@@ -1224,11 +1223,45 @@ public class UncoloredSimon : MonoBehaviour
 
     }
 
-    /* If anyone wants to implement the autosolver for this mod, be my guest. - Kilo
     IEnumerator TwitchHandleForcedSolve()
     {
-        yield return null;
+        if (ModuleSolved || !isActivated)
+            yield break;
+
+        for (int i = 0; i < 4; i++)
+            while (currentStampColor[i] != Array.IndexOf(unlitColors, correctStamp[i]))
+            {
+                Buttons[i].OnInteract();
+                yield return new WaitForSeconds(0.1f);
+            }
+        Buttons[(int)ButtonNames.Submit].OnInteract();
+
+        yield return new WaitForSeconds(2.75f);
+
+        for (int i = 0; i < 9; i++)
+        {
+            Buttons[stampOrder[i] + 5].OnInteract();
+            if (stampOrder[i] % 2 == 0)
+            {
+                RotateStamp((int)ButtonNames.RotateCW);
+                Playsound(SoundeffectNames.RotateCW);
+            }
+            else
+            {
+                RotateStamp((int)ButtonNames.RotateCCW);
+                Playsound(SoundeffectNames.RotateCCW);
+            }
+            yield return new WaitForSeconds(0.1f);
+        }
+        Buttons[(int)ButtonNames.Submit].OnInteract();
+        yield return new WaitForSeconds(3.6f);
+
+        for (int i = 0; i < 15; i++)
+        {
+            Buttons[(int)Enum.Parse(typeof(ButtonNames), SimonPhaseAnswer[i % 5])].OnInteract();
+            yield return new WaitForSeconds(0.2f);
+        }
+
     }
-    */
     #endregion
 }
