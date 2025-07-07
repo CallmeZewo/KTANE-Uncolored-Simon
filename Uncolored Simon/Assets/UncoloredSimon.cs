@@ -2,8 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using UnityEngine;
+using static Enums;
 
 public class UncoloredSimon : MonoBehaviour
 {
@@ -24,15 +24,14 @@ public class UncoloredSimon : MonoBehaviour
     #region Private Fields
     static int ModuleIdCounter = 1;
     int ModuleId;
-    bool ModuleSolved;
+    bool ModuleSolved = false;
     bool twoPair = false;
     bool isActivated;
-    bool CheckStampIsRunning = false;
+    bool isStampCheckInProgress = false;
     bool playSimon = false;
-    bool CheckGridIsRunning = false;
-    bool Solved = false;
-    bool buffer = true;
-    private bool cbActive;
+    bool isGridCheckInProgress = false;
+    bool clickBufferCooldown = true;
+    private bool isColorBlindActive;
     ModulePhase currentPhase = ModulePhase.Gray;
 
     int[] currentStampColor = new int[] { -1, -1, -1, -1 };
@@ -40,7 +39,7 @@ public class UncoloredSimon : MonoBehaviour
     Dictionary<ColorNames, List<int>> StampOrderLists;
     Dictionary<int, List<Material>> QColors;
     MeshRenderer[] gridRenderers;
-    MeshRenderer[] stampRenderer;
+    MeshRenderer[] stampRenderers;
     List<int> stampOrder = new List<int>();
     List<GameObject> playedSimonPhase = new List<GameObject>();
     List<string> SimonPhaseAnswer = new List<string>();
@@ -53,53 +52,13 @@ public class UncoloredSimon : MonoBehaviour
     private char[] gridCBLetters = new char[16];
     #endregion
 
-    #region Enums
-    enum PosInQuadrant
-    {
-        Top, Right, Down, Left
-    }
-    enum ModulePhase
-    {
-        Gray,
-        Stamp,
-        Simon1,
-        Simon2,
-        Simon3,
-    }
-    enum ColorNames
-    {
-        Blue, Brown, Cyan, Green, Magenta, Purple, Red, Yellow
-    }
-
-    public enum ButtonNames
-    {
-        StampTop, StampRight, StampDown, StampLeft,
-        RotateCW, RotateCCW,
-        StampSpotTop, StampSpotTopLeft, StampSpotTopRight,
-        StampSpotLeft, StampSpotMiddle, StampSpotRight,
-        StampSpotDownLeft, StampSpotDownRight, StampSpotDown,
-        Q1Top, Q1Down, Q1Left, Q1Right,
-        Q2Top, Q2Down, Q2Left, Q2Right,
-        Q3Top, Q3Down, Q3Left, Q3Right,
-        Q4Top, Q4Down, Q4Left, Q4Right,
-        ResetButton, Submit
-    }
-
-    enum SoundeffectNames
-    {
-        Blue, Brown, Cyan, Green, Magenta, Purple, Red, Yellow,
-        RotateCW, RotateCCW,
-        ShortCorrect, LongCorrect, ShortFail, LongFail, CheckBigGrid
-    }
-    #endregion
-
     #region Unity Lifecycle
     void Awake()
     {
         ModuleId = ModuleIdCounter++;
         GetComponent<KMBombModule>().OnActivate += Activate;
 
-        cbActive = Colorblind.ColorblindModeActive;
+        isColorBlindActive = Colorblind.ColorblindModeActive;
 
         foreach (KMSelectable button in Buttons)
             button.OnInteract += delegate () { InputHandler(button); return false; };
@@ -107,29 +66,10 @@ public class UncoloredSimon : MonoBehaviour
 
     void Start()
     {
-        List<MeshRenderer> renderers = new List<MeshRenderer>();
-        foreach (GameObject obj in GridTiles)
-            renderers.Add(obj.GetComponent<MeshRenderer>());
-        gridRenderers = renderers.ToArray();
+        gridRenderers = GridTiles.Select(obj => obj.GetComponent<MeshRenderer>()).ToArray();
+        stampRenderers = Stamp.Select(obj => obj.GetComponent<MeshRenderer>()).ToArray();
 
-        renderers.Clear();
-        foreach (GameObject obj in Stamp)
-            renderers.Add(obj.GetComponent<MeshRenderer>());
-        stampRenderer = renderers.ToArray();
-
-        var filterNonCB = new[]
-        {
-            0, 1, 2, 3,
-            15, 16, 17, 18,
-            19, 20, 21, 22,
-            23, 24, 25, 26,
-            27, 28, 29, 30
-        };
-
-        var getCB = Enumerable.Range(0, 33).Where(filterNonCB.Contains).Select(x => Buttons[x].GetComponentInChildren<TextMesh>()).ToArray();
-
-        foreach (var cbText in getCB)
-            cbText.text = string.Empty;
+        ResetCB();
 
         stampTable = new Material[4, 4]
         {
@@ -157,6 +97,7 @@ public class UncoloredSimon : MonoBehaviour
     void Activate()
     {
         StartCoroutine(DisplayGrayscale());
+        isActivated = true;
     }
     #endregion
 
@@ -172,32 +113,30 @@ public class UncoloredSimon : MonoBehaviour
 
         FillQuadrantsWithCurrentColor();
         GetCorrectStampColors();
-
-        isActivated = true;
     }
 
     IEnumerator CheckStampAnimation()
     {
-        if (CheckStampIsRunning) yield break;
-        CheckStampIsRunning = true;
+        if (isStampCheckInProgress) yield break;
+        isStampCheckInProgress = true;
         for (int i = 0; i < 4; i++)
         {
 
-            int index = Array.IndexOf(unlitColors, stampRenderer[i].sharedMaterial);
-            if (correctStamp[i].name == unlitColors[currentStampColor[i]].name)
+            int index = Array.FindIndex(unlitColors, m => m.color == stampRenderers[i].material.color);
+            if (correctStamp[i] == unlitColors[currentStampColor[i]])
             {
-                stampRenderer[i].material = litColors[index];
+                stampRenderers[i].material = litColors[index];
                 Playsound((SoundeffectNames)index);
                 yield return new WaitForSeconds(.5f);
                 continue;
             }
             Strike();
             ChangeStampColor();
-            CheckStampIsRunning = false;
+            isStampCheckInProgress = false;
             yield break;
         }
         currentPhase = ModulePhase.Stamp;
-        CheckStampIsRunning = false;
+        isStampCheckInProgress = false;
         Playsound(SoundeffectNames.ShortCorrect);
         ChangeStampColor();
         StartCoroutine(InitiateStampPhaseAnimation());
@@ -207,12 +146,12 @@ public class UncoloredSimon : MonoBehaviour
 
     IEnumerator CheckGridAnimation()
     {
-        if (CheckGridIsRunning) yield break;
-        CheckGridIsRunning = true;
+        if (isGridCheckInProgress) yield break;
+        isGridCheckInProgress = true;
         for (int i = 0; i < gridRenderers.Length; i++)
         {
 
-            int index = Array.IndexOf(unlitColors, gridRenderers[i].sharedMaterial);
+            int index = Array.FindIndex(unlitColors, m => m.color == gridRenderers[i].material.color);
             if (ColoredGrid[i].name == unlitColors[index].name)
             {
                 gridRenderers[i].material = litColors[index];
@@ -222,17 +161,21 @@ public class UncoloredSimon : MonoBehaviour
             }
             Strike();
             GridToUnlit();
-            CheckGridIsRunning = false;
+            isGridCheckInProgress = false;
             yield break;
         }
         currentPhase = ModulePhase.Simon1;
-        CheckGridIsRunning = false;
+        isGridCheckInProgress = false;
         Playsound(SoundeffectNames.ShortCorrect);
         GridToUnlit();
-        foreach (MeshRenderer mr in stampRenderer)
+        foreach (MeshRenderer mr in stampRenderers)
         {
             mr.material = NoColor;
         }
+        var stampCB = Enumerable.Range(0, Stamp.Count()).Select(x => Buttons[x].GetComponentInChildren<TextMesh>()).ToArray();
+
+        foreach (var cbText in stampCB)
+            cbText.text = string.Empty;
         FillQuadrantsWithCurrentColor();
         GenerateSimonPhase();
         playSimon = true;
@@ -245,33 +188,32 @@ public class UncoloredSimon : MonoBehaviour
         for (int i = 0; i < 16; i++)
         {
             gridRenderers[i].material = NoColor;
-            yield return new WaitForSeconds(.025f);
+            yield return new WaitForSeconds(.015f);
         }
     }
 
     IEnumerator PlaySimonPhase()
     {
-        foreach (GameObject Obj in playedSimonPhase)
+        while (playSimon)
         {
-            Material currentMat = Obj.GetComponent<MeshRenderer>().sharedMaterial;
-            int index = Array.FindIndex(unlitColors, m => m.color == currentMat.color);
-            Obj.GetComponent<MeshRenderer>().material = litColors[index];
-            Playsound((SoundeffectNames)index);
-            yield return new WaitForSeconds(.8f);
-            Obj.GetComponent<MeshRenderer>().material = unlitColors[index];
-        }
-        if (playSimon)
-        {
+            foreach (GameObject obj in playedSimonPhase)
+            {
+                var renderer = obj.GetComponent<MeshRenderer>();
+                int index = Array.FindIndex(unlitColors, m => m.color == renderer.sharedMaterial.color);
+                renderer.material = litColors[index];
+                Playsound((SoundeffectNames)index);
+                yield return new WaitForSeconds(0.8f);
+                renderer.material = unlitColors[index];
+            }
             yield return new WaitForSeconds(2.5f);
-            StartCoroutine(PlaySimonPhase());
         }
     }
 
     IEnumerator LightUpOnClick(int diamondIndex)
     {
-        if (buffer)
+        if (clickBufferCooldown)
         {
-            buffer = false;
+            clickBufferCooldown = false;
             Material diamondMat = Buttons[diamondIndex].GetComponent<MeshRenderer>().material;
             int index = Array.FindIndex(unlitColors, m => m.color == diamondMat.color);
             Buttons[diamondIndex].GetComponent<MeshRenderer>().material = litColors[index];
@@ -291,7 +233,7 @@ public class UncoloredSimon : MonoBehaviour
     #region Input Handling
     void InputHandler(KMSelectable button)
     {
-        if (Solved || !isActivated) return;
+        if (ModuleSolved || !isActivated) return;
         //Simon Phase play handler
         if (currentPhase >= ModulePhase.Simon1)
         {
@@ -316,7 +258,7 @@ public class UncoloredSimon : MonoBehaviour
             case ButtonNames.StampRight:
             case ButtonNames.StampDown:
             case ButtonNames.StampLeft:
-                if (currentPhase != ModulePhase.Gray || CheckStampIsRunning) return;
+                if (currentPhase != ModulePhase.Gray || isStampCheckInProgress) return;
                 ChangeStampIndex(index);
                 break;
 
@@ -361,7 +303,7 @@ public class UncoloredSimon : MonoBehaviour
                 GameObject pressedButton = Buttons[index].gameObject;
                 int colorIndexOfButton = Array.IndexOf(unlitColors.Select(c => c.color).ToArray(), pressedButton.GetComponent<MeshRenderer>().material.color);
                 Playsound((SoundeffectNames)colorIndexOfButton);
-                buffer = true;
+                clickBufferCooldown = true;
                 StartCoroutine(LightUpOnClick(index));
                 InputSimonPhase(btn);
                 break;
@@ -398,10 +340,10 @@ public class UncoloredSimon : MonoBehaviour
         {
             if (currentStampColor[i] < 0)
             {
-                stampRenderer[i].material = NoColor;
+                stampRenderers[i].material = NoColor;
                 continue;
             }
-            stampRenderer[i].material = unlitColors[currentStampColor[i]];
+            stampRenderers[i].material = unlitColors[currentStampColor[i]];
         }
 
         ToggleColorblind(reset: reset);
@@ -446,58 +388,58 @@ public class UncoloredSimon : MonoBehaviour
         switch (pip)
         {
             case 1:
-                gridRenderers[0].material = stampRenderer[0].sharedMaterial;
-                gridRenderers[2].material = stampRenderer[1].sharedMaterial;
-                gridRenderers[4].material = stampRenderer[2].sharedMaterial;
-                gridRenderers[1].material = stampRenderer[3].sharedMaterial;
+                gridRenderers[0].material = stampRenderers[0].sharedMaterial;
+                gridRenderers[2].material = stampRenderers[1].sharedMaterial;
+                gridRenderers[4].material = stampRenderers[2].sharedMaterial;
+                gridRenderers[1].material = stampRenderers[3].sharedMaterial;
                 break;
             case 2:
-                gridRenderers[1].material = stampRenderer[0].sharedMaterial;
-                gridRenderers[4].material = stampRenderer[1].sharedMaterial;
-                gridRenderers[7].material = stampRenderer[2].sharedMaterial;
-                gridRenderers[3].material = stampRenderer[3].sharedMaterial;
+                gridRenderers[1].material = stampRenderers[0].sharedMaterial;
+                gridRenderers[4].material = stampRenderers[1].sharedMaterial;
+                gridRenderers[7].material = stampRenderers[2].sharedMaterial;
+                gridRenderers[3].material = stampRenderers[3].sharedMaterial;
                 break;
             case 3:
-                gridRenderers[3].material = stampRenderer[0].sharedMaterial;
-                gridRenderers[7].material = stampRenderer[1].sharedMaterial;
-                gridRenderers[10].material = stampRenderer[2].sharedMaterial;
-                gridRenderers[6].material = stampRenderer[3].sharedMaterial;
+                gridRenderers[3].material = stampRenderers[0].sharedMaterial;
+                gridRenderers[7].material = stampRenderers[1].sharedMaterial;
+                gridRenderers[10].material = stampRenderers[2].sharedMaterial;
+                gridRenderers[6].material = stampRenderers[3].sharedMaterial;
                 break;
             case 4:
-                gridRenderers[7].material = stampRenderer[0].sharedMaterial;
-                gridRenderers[11].material = stampRenderer[1].sharedMaterial;
-                gridRenderers[13].material = stampRenderer[2].sharedMaterial;
-                gridRenderers[10].material = stampRenderer[3].sharedMaterial;
+                gridRenderers[7].material = stampRenderers[0].sharedMaterial;
+                gridRenderers[11].material = stampRenderers[1].sharedMaterial;
+                gridRenderers[13].material = stampRenderers[2].sharedMaterial;
+                gridRenderers[10].material = stampRenderers[3].sharedMaterial;
                 break;
             case 5:
-                gridRenderers[11].material = stampRenderer[0].sharedMaterial;
-                gridRenderers[14].material = stampRenderer[1].sharedMaterial;
-                gridRenderers[15].material = stampRenderer[2].sharedMaterial;
-                gridRenderers[13].material = stampRenderer[3].sharedMaterial;
+                gridRenderers[11].material = stampRenderers[0].sharedMaterial;
+                gridRenderers[14].material = stampRenderers[1].sharedMaterial;
+                gridRenderers[15].material = stampRenderers[2].sharedMaterial;
+                gridRenderers[13].material = stampRenderers[3].sharedMaterial;
                 break;
             case 6:
-                gridRenderers[8].material = stampRenderer[0].sharedMaterial;
-                gridRenderers[12].material = stampRenderer[1].sharedMaterial;
-                gridRenderers[14].material = stampRenderer[2].sharedMaterial;
-                gridRenderers[11].material = stampRenderer[3].sharedMaterial;
+                gridRenderers[8].material = stampRenderers[0].sharedMaterial;
+                gridRenderers[12].material = stampRenderers[1].sharedMaterial;
+                gridRenderers[14].material = stampRenderers[2].sharedMaterial;
+                gridRenderers[11].material = stampRenderers[3].sharedMaterial;
                 break;
             case 7:
-                gridRenderers[5].material = stampRenderer[0].sharedMaterial;
-                gridRenderers[9].material = stampRenderer[1].sharedMaterial;
-                gridRenderers[12].material = stampRenderer[2].sharedMaterial;
-                gridRenderers[8].material = stampRenderer[3].sharedMaterial;
+                gridRenderers[5].material = stampRenderers[0].sharedMaterial;
+                gridRenderers[9].material = stampRenderers[1].sharedMaterial;
+                gridRenderers[12].material = stampRenderers[2].sharedMaterial;
+                gridRenderers[8].material = stampRenderers[3].sharedMaterial;
                 break;
             case 8:
-                gridRenderers[2].material = stampRenderer[0].sharedMaterial;
-                gridRenderers[5].material = stampRenderer[1].sharedMaterial;
-                gridRenderers[8].material = stampRenderer[2].sharedMaterial;
-                gridRenderers[4].material = stampRenderer[3].sharedMaterial;
+                gridRenderers[2].material = stampRenderers[0].sharedMaterial;
+                gridRenderers[5].material = stampRenderers[1].sharedMaterial;
+                gridRenderers[8].material = stampRenderers[2].sharedMaterial;
+                gridRenderers[4].material = stampRenderers[3].sharedMaterial;
                 break;
             case 9:
-                gridRenderers[4].material = stampRenderer[0].sharedMaterial;
-                gridRenderers[8].material = stampRenderer[1].sharedMaterial;
-                gridRenderers[11].material = stampRenderer[2].sharedMaterial;
-                gridRenderers[7].material = stampRenderer[3].sharedMaterial;
+                gridRenderers[4].material = stampRenderers[0].sharedMaterial;
+                gridRenderers[8].material = stampRenderers[1].sharedMaterial;
+                gridRenderers[11].material = stampRenderers[2].sharedMaterial;
+                gridRenderers[7].material = stampRenderers[3].sharedMaterial;
                 break;
         }
 
@@ -520,7 +462,7 @@ public class UncoloredSimon : MonoBehaviour
 
             var cbLetter = colorName == ColorNames.Brown ? 'N' : colorName.ToString()[0];
 
-            getCB[i].text = cbActive ? cbLetter.ToString() : string.Empty;
+            getCB[i].text = isColorBlindActive ? cbLetter.ToString() : string.Empty;
             getCB[i].color = cbLetter == 'Y' ? Color.black : Color.white;
         }
 
@@ -534,8 +476,6 @@ public class UncoloredSimon : MonoBehaviour
 
             return;
         }
-
-
         
         var getColorLetters = new char[4];
 
@@ -567,10 +507,26 @@ public class UncoloredSimon : MonoBehaviour
 
         for (int i = 0; i < 16; i++)
         {
-            restCB[i].text = cbActive ? gridCBLetters[i].ToString() : string.Empty;
+            restCB[i].text = isColorBlindActive ? gridCBLetters[i].ToString() : string.Empty;
             restCB[i].GetComponentInChildren<TextMesh>().color = gridCBLetters[i] == 'Y' ? Color.black : Color.white;
         }
+    }
 
+    void ResetCB()
+    {
+        var filterNonCB = new HashSet<int>
+        {
+            0, 1, 2, 3,
+            15, 16, 17, 18,
+            19, 20, 21, 22,
+            23, 24, 25, 26,
+            27, 28, 29, 30
+        };
+
+        var getCB = Enumerable.Range(0, Buttons.Length).Where(filterNonCB.Contains).Select(x => Buttons[x].GetComponentInChildren<TextMesh>()).ToArray();
+
+        foreach (var cbText in getCB)
+            cbText.text = string.Empty;
     }
 
     void ResetStampPhase()
@@ -953,11 +909,11 @@ public class UncoloredSimon : MonoBehaviour
         switch (currentPhase)
         {
             case ModulePhase.Gray:
-                if (CheckStampIsRunning || currentStampColor.Contains(-1)) return;
+                if (isStampCheckInProgress || currentStampColor.Contains(-1)) return;
                 StartCoroutine(CheckStampAnimation());
                 break;
             case ModulePhase.Stamp:
-                if (CheckGridIsRunning || gridRenderers.Select(r => r.sharedMaterial).Contains(NoColor)) return;
+                if (isGridCheckInProgress || gridRenderers.Select(r => r.sharedMaterial).Contains(NoColor)) return;
                 StartCoroutine(CheckGridAnimation());
                 break;
             case ModulePhase.Simon1:
@@ -992,9 +948,11 @@ public class UncoloredSimon : MonoBehaviour
     void Solve()
     {
         Playsound(SoundeffectNames.LongCorrect);
-        Solved = true;
+        ModuleSolved = true;
         playSimon = false;
         StopAllCoroutines();
+        StartCoroutine(InitiateStampPhaseAnimation());
+        ResetCB();
         GetComponent<KMBombModule>().HandlePass();
     }
 
@@ -1017,7 +975,7 @@ public class UncoloredSimon : MonoBehaviour
 
         yield return null;
 
-        if (CheckGridIsRunning || CheckStampIsRunning || !isActivated)
+        if (isGridCheckInProgress || isStampCheckInProgress || !isActivated)
         {
             yield return "sendtochaterror This module cannot be interacted with yet!";
             yield break;
@@ -1025,7 +983,7 @@ public class UncoloredSimon : MonoBehaviour
 
         if (new[] { "CB", "COLORBLIND" }.Any(x => x.ContainsIgnoreCase(split[0])))
         {
-            cbActive = !cbActive;
+            isColorBlindActive = !isColorBlindActive;
             ToggleColorblind(tpToggle: true);
         }
 
@@ -1225,43 +1183,51 @@ public class UncoloredSimon : MonoBehaviour
 
     IEnumerator TwitchHandleForcedSolve()
     {
-        if (ModuleSolved || !isActivated)
-            yield break;
+        while (!isActivated)
+            yield return true;
+        if (currentPhase == ModulePhase.Gray)
+        {
+            for (int i = 0; i < 4; i++)
+                while (currentStampColor[i] != Array.IndexOf(unlitColors, correctStamp[i]))
+                {
+                    Buttons[i].OnInteract();
+                    yield return new WaitForSeconds(0.1f);
+                }
+            Buttons[(int)ButtonNames.Submit].OnInteract();
+        }
 
-        for (int i = 0; i < 4; i++)
-            while (currentStampColor[i] != Array.IndexOf(unlitColors, correctStamp[i]))
+        while (stampOrder.Count == 0)
+            yield return true;
+
+        if (currentPhase == ModulePhase.Stamp)
+        {
+            Buttons[(int)ButtonNames.ResetButton].OnInteract();
+            yield return new WaitForSeconds(0.1f);
+            for (int i = 0; i < 9; i++)
             {
-                Buttons[i].OnInteract();
+                Buttons[stampOrder[i] + 5].OnInteract();
+                yield return new WaitForSeconds(0.1f);
+                if (stampOrder[i] % 2 == 0)
+                {
+                    Buttons[(int)ButtonNames.RotateCW].OnInteract();
+                }
+                else
+                {
+                    Buttons[(int)ButtonNames.RotateCCW].OnInteract();
+                }
                 yield return new WaitForSeconds(0.1f);
             }
-        Buttons[(int)ButtonNames.Submit].OnInteract();
-
-        yield return new WaitForSeconds(2.75f);
-
-        for (int i = 0; i < 9; i++)
-        {
-            Buttons[stampOrder[i] + 5].OnInteract();
-            if (stampOrder[i] % 2 == 0)
-            {
-                RotateStamp((int)ButtonNames.RotateCW);
-                Playsound(SoundeffectNames.RotateCW);
-            }
-            else
-            {
-                RotateStamp((int)ButtonNames.RotateCCW);
-                Playsound(SoundeffectNames.RotateCCW);
-            }
-            yield return new WaitForSeconds(0.1f);
+            Buttons[(int)ButtonNames.Submit].OnInteract();
         }
-        Buttons[(int)ButtonNames.Submit].OnInteract();
-        yield return new WaitForSeconds(3.6f);
+
+        while (SimonPhaseAnswer.Count == 0)
+            yield return true;
 
         for (int i = 0; i < 15; i++)
         {
             Buttons[(int)Enum.Parse(typeof(ButtonNames), SimonPhaseAnswer[i % 5])].OnInteract();
-            yield return new WaitForSeconds(0.2f);
+            yield return new WaitForSeconds(0.1f);
         }
-
     }
     #endregion
 }

@@ -178,7 +178,7 @@ public class MonoRandom
     {
         if (buffer == null)
         {
-            throw new ArgumentNullException("buffer");
+            throw new ArgumentNullException("clickBufferCooldown");
         }
         for (var i = 0; i < buffer.Length; i++)
         {
