@@ -9,6 +9,7 @@ public class UncoloredSimon : MonoBehaviour
     #region Public Unity Fields
     public KMBombInfo Bomb;
     public KMAudio Audio;
+    public KMColorblindMode Colorblind;
     public Transform ModuleTransform;
     public KMSelectable[] Buttons;
     public Material NoColor;
@@ -24,11 +25,13 @@ public class UncoloredSimon : MonoBehaviour
     int ModuleId;
     bool ModuleSolved;
     bool twoPair = false;
+    bool isActivated;
     bool CheckStampIsRunning = false;
     bool playSimon = false;
     bool CheckGridIsRunning = false;
     bool Solved = false;
-    bool buffer = true;    
+    bool buffer = true;
+    private bool cbActive;
     ModulePhase currentPhase = ModulePhase.Gray;
 
     int[] currentStampColor = new int[] { -1, -1, -1, -1 };
@@ -45,6 +48,8 @@ public class UncoloredSimon : MonoBehaviour
     List<Material> correctStamp = new List<Material>();
     Material[] Grayscale;
     Material[,] stampTable;
+
+    private char[] gridCBLetters = new char[16];
     #endregion
 
     #region Enums
@@ -93,6 +98,8 @@ public class UncoloredSimon : MonoBehaviour
         ModuleId = ModuleIdCounter++;
         GetComponent<KMBombModule>().OnActivate += Activate;
 
+        cbActive = Colorblind.ColorblindModeActive;
+
         foreach (KMSelectable button in Buttons)
             button.OnInteract += delegate () { InputHandler(button); return false; };
     }
@@ -108,6 +115,20 @@ public class UncoloredSimon : MonoBehaviour
         foreach (GameObject obj in Stamp)
             renderers.Add(obj.GetComponent<MeshRenderer>());
         stampRenderer = renderers.ToArray();
+
+        var filterNonCB = new[]
+        {
+            0, 1, 2, 3,
+            15, 16, 17, 18,
+            19, 20, 21, 22,
+            23, 24, 25, 26,
+            27, 28, 29, 30
+        };
+
+        var getCB = Enumerable.Range(0, 33).Where(filterNonCB.Contains).Select(x => Buttons[x].GetComponentInChildren<TextMesh>()).ToArray();
+
+        foreach (var cbText in getCB)
+            cbText.text = string.Empty;
 
         stampTable = new Material[4, 4]
         {
@@ -136,16 +157,6 @@ public class UncoloredSimon : MonoBehaviour
     {
         StartCoroutine(DisplayGrayscale());
     }
-
-    void Update()
-    {
-        // Nothing needed here right now
-    }
-
-    void OnDestroy()
-    {
-        // Cleanup if needed
-    }
     #endregion
 
     #region Coroutines
@@ -160,6 +171,8 @@ public class UncoloredSimon : MonoBehaviour
 
         FillQuadrantsWithCurrentColor();
         GetCorrectStampColors();
+
+        isActivated = true;
     }
 
     IEnumerator CheckStampAnimation()
@@ -279,7 +292,7 @@ public class UncoloredSimon : MonoBehaviour
     #region Input Handling
     void InputHandler(KMSelectable button)
     {
-        if (Solved) return;
+        if (Solved || !isActivated) return;
         //Simon Phase play handler
         if (currentPhase >= ModulePhase.Simon1)
         {
@@ -294,16 +307,6 @@ public class UncoloredSimon : MonoBehaviour
 
         //Get index from array
         int index = Array.IndexOf(Buttons, button);
-
-        //Catch exceptions and log them
-        if (index == -1)
-        {
-            Debug.Log("Value: " + button + " not valid in the InputHandler");
-            return;
-        }
-
-        //Log pressed button
-        Debug.Log(button);
 
         //Logic for what button pressed
         ButtonNames btn = (ButtonNames)index;
@@ -371,11 +374,6 @@ public class UncoloredSimon : MonoBehaviour
                 if (currentPhase >= ModulePhase.Simon1) return;
                 CheckCurrentPhase();
                 break;
-
-            //Default if exceptions happen at some point
-            default:
-                Debug.Log("Unhandled button index: " + index);
-                break;
         }
     }
     #endregion
@@ -385,15 +383,7 @@ public class UncoloredSimon : MonoBehaviour
     {
         if (currentPhase != ModulePhase.Gray) { return; }
 
-        if (index < 0 || index >= currentStampColor.Length)
-        {
-            Debug.Log("An Error accrued when trying to index the 'Stamp' location, invalid value: " + index);
-            return;
-        }
-
         currentStampColor[index] = (currentStampColor[index] + 1) % unlitColors.Length;
-
-        Debug.Log("Stamp " + index + " changed color to " + currentStampColor[index]);
 
         oldStamp = currentStampColor;
 
@@ -402,8 +392,9 @@ public class UncoloredSimon : MonoBehaviour
         Playsound((SoundeffectNames)currentStampColor[index]);
     }
 
-    void ChangeStampColor()
+    void ChangeStampColor(bool reset = false)
     {
+
         for (int i = 0; i < 4; i++)
         {
             if (currentStampColor[i] < 0)
@@ -413,6 +404,8 @@ public class UncoloredSimon : MonoBehaviour
             }
             stampRenderer[i].material = unlitColors[currentStampColor[i]];
         }
+
+        ToggleColorblind(reset: reset);
     }
 
     void RotateStamp(int buttonIndex)
@@ -442,7 +435,6 @@ public class UncoloredSimon : MonoBehaviour
         {
             int column = GetTableColumn(index);
             int row = GetTableRow(index);
-            Debug.Log($"StampPos {index}: Row={row + 1}, Col={column + 1}, Color={stampTable[row, column].name}");
             correctStamp.Add(stampTable[row, column]);
         }
         Debug.LogFormat("[Uncolored Simon #{0}] Correct stamp colors selected: {1}", ModuleId,
@@ -509,15 +501,88 @@ public class UncoloredSimon : MonoBehaviour
                 gridRenderers[7].material = stampRenderer[3].sharedMaterial;
                 break;
         }
+
+        ToggleColorblind(pip - 1, reset: false);
+    }
+
+    void ToggleColorblind(int? pip = null, bool tpToggle = false, bool reset = false)
+    {
+        var getCB = Enumerable.Range(0, 4).Select(x => Buttons[x].GetComponentInChildren<TextMesh>()).ToArray();
+
+        for (int i = 0; i < 4; i++)
+        {
+            if (currentStampColor[i] < 0)
+            {
+                getCB[i].text = string.Empty;
+                continue;
+            }
+
+            var colorName = (ColorNames)currentStampColor[i];
+
+            var cbLetter = colorName == ColorNames.Brown ? 'N' : colorName.ToString()[0];
+
+            getCB[i].text = cbActive ? cbLetter.ToString() : string.Empty;
+            getCB[i].color = cbLetter == 'Y' ? Color.black : Color.white;
+        }
+
+        var restCB = GridTiles.Select(x => x.GetComponentInChildren<TextMesh>()).ToArray();
+
+        if (pip == null)
+        {
+            if (reset)
+                foreach (var cb in restCB)
+                    cb.text = string.Empty;
+
+            return;
+        }
+
+
+        
+        var getColorLetters = new char[4];
+
+        for (int i = 0; i < 4; i++)
+        {
+            var colorName = (ColorNames)currentStampColor[i];
+
+            getColorLetters[i] = colorName == ColorNames.Brown ? 'N' : colorName.ToString()[0];
+        }
+
+        var cbTextsByPip = new[]
+        {
+            Enumerable.Range(0, 4).ToArray(),
+            new[] { 3, 2, 13, 12 },
+            new[] { 12, 13, 14, 15 },
+            new[] { 13, 8, 11, 14 },
+            new[] { 8, 9, 10, 11 },
+            new[] { 7, 6, 9, 8 },
+            new[] { 4, 5, 6, 7 },
+            new[] { 1, 4, 7, 2 },
+            new[] { 2, 7, 8, 13 }
+        };
+
+        if (!tpToggle)
+        {
+            for (int i = 0; i < 4; i++)
+                gridCBLetters[cbTextsByPip[pip.Value][i]] = getColorLetters[i];
+        }
+
+        for (int i = 0; i < 16; i++)
+        {
+            restCB[i].text = cbActive ? gridCBLetters[i].ToString() : string.Empty;
+            restCB[i].GetComponentInChildren<TextMesh>().color = gridCBLetters[i] == 'Y' ? Color.black : Color.white;
+        }
+
     }
 
     void ResetStampPhase()
     {
         currentStampColor = oldStamp;
-        ChangeStampColor();
-        foreach (MeshRenderer tile in gridRenderers)
+        ChangeStampColor(true);
+
+        for (int i = 0; i < 16; i++)
         {
-            tile.material = NoColor;
+            gridRenderers[i].material = NoColor;
+            gridCBLetters[i] = ' ';
         }
         Playsound(SoundeffectNames.RotateCCW);
     }
@@ -559,10 +624,6 @@ public class UncoloredSimon : MonoBehaviour
                     }
                 }
             }
-        }
-        for (int i = 0; i < stampOrder.Count; i++)
-        {
-            Debug.Log(stampOrder[i]);
         }
 
         //Logging
@@ -913,9 +974,6 @@ public class UncoloredSimon : MonoBehaviour
             case ModulePhase.Simon3:
                 Solve();
                 break;
-            default:
-                Debug.Log("Current phase is undefined!");
-                break;
         }
     }
 
@@ -950,16 +1008,223 @@ public class UncoloredSimon : MonoBehaviour
     #endregion
 
     #region Twitch Plays
-    /* Uncomment if needed
 #pragma warning disable 414
-    private readonly string TwitchHelpMessage = @"Use !{0} to do something.";
+    private readonly string TwitchHelpMessage = @"!{0} cb/colorblind toggles colorblind support || stamp set blue brown magenta cyan sets the colors clockwises starting from the top || stamp rotate cw/ccw rotates the stamp in that direction || pip t/tl/l/dl/dl/dr/r/tr/m presses the pip to set the colors from the stamp || reset to reset grid || submit to submit either the stamp or the grid || q1t q2d q3r q4l to press the buttons in that quadrant and position respectively.";
 #pragma warning restore 414
 
-    IEnumerator ProcessTwitchCommand(string Command)
+    IEnumerator ProcessTwitchCommand(string command)
     {
+        string[] split = command.ToUpperInvariant().Split(new[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+
         yield return null;
+
+        if (CheckGridIsRunning || CheckStampIsRunning || !isActivated)
+        {
+            yield return "sendtochaterror This module cannot be interacted with yet!";
+            yield break;
+        }
+
+        if (new[] { "CB", "COLORBLIND" }.Any(x => x.ContainsIgnoreCase(split[0])))
+        {
+            cbActive = !cbActive;
+            ToggleColorblind(tpToggle: true);
+        }
+
+        if ("STAMP".ContainsIgnoreCase(split[0]))
+        {
+            if (split.Length == 1)
+            {
+                yield return "sendtochaterror I don't understand.";
+                yield break;
+            }
+
+            if ("SET".ContainsIgnoreCase(split[1]))
+            {
+                if (currentPhase != ModulePhase.Gray)
+                {
+                    yield return "sendtochaterror You have already completed the gray phase!";
+                    yield break;
+                }
+
+                if (split.Length == 2)
+                {
+                    yield return "sendtochaterror Please specify what colors to put in clockwise order!";
+                    yield break;
+                }
+
+                if (split.Skip(2).Count() > 4)
+                {
+                    yield return "sendtochaterror You're inputting too many colors! Please keep it only to four!";
+                    yield break;
+                }
+
+                if (split.Skip(2).Count() < 4)
+                {
+                    yield return "sendtochaterror Please try again.";
+                    yield break;
+                }
+
+                var validColorNames = new[] { "BLUE", "BROWN", "CYAN", "GREEN", "MAGENTA", "PURPLE", "RED", "YELLOW" };
+
+                if (!split.Skip(2).Any(validColorNames.Contains))
+                {
+                    yield return $"sendtochaterror {split.Skip(2).Where(x => !validColorNames.Contains(x)).Join(", ")} is/are invalid!";
+                    yield break;
+                }
+
+                var setupColors = split.Skip(2).Select(x => Array.IndexOf(validColorNames, x)).ToArray();
+
+                for (int i = 0; i < 4; i++)
+                    while (currentStampColor[i] != setupColors[i])
+                    {
+                        Buttons[i].OnInteract();
+                        yield return new WaitForSeconds(0.1f);
+                    }
+            }
+
+            if ("ROTATE".ContainsIgnoreCase(split[1]))
+            {
+                if (currentPhase != ModulePhase.Stamp)
+                {
+                    yield return "sendtochaterror You are either not in this phase yet, or you're already past it!";
+                    yield break;
+                }
+
+                if (split.Length == 2)
+                {
+                    yield return "sendtochaterror Please specify whether to go clockwise or counterclockwise!";
+                    yield break;
+                }
+
+                if (split.Length > 3)
+                {
+                    yield return "sendtochaterror Please try again.";
+                    yield break;
+                }
+
+                var validRotations = new[] { "CW", "CCW" };
+
+                if (!validRotations.Any(x => x.ContainsIgnoreCase(split[2])))
+                {
+                    yield return $"sendtochaterror {split[2]} isn't valid!";
+                    yield break;
+                }
+
+                var rotationIx = split[2] == "CW" ? 4 : 5;
+
+                Buttons[rotationIx].OnInteract();
+                yield return new WaitForSeconds(0.1f);
+            }
+
+            yield break;
+        }
+
+        if ("PIP".ContainsIgnoreCase(split[0]))
+        {
+            if (currentPhase != ModulePhase.Stamp)
+            {
+                yield return "sendtochaterror You are either not in this phase yet, or you're already past it!";
+                yield break;
+            }
+
+            if (split.Length == 1)
+            {
+                yield return "sendtochaterror I don't understand.";
+                yield break;
+            }
+
+            if (split.Length > 2)
+            {
+                yield return "sendtochaterror Please try again.";
+                yield break;
+            }
+
+            var validPipNames = new[] { "T", "TL", "L", "DL", "D", "DR", "R", "TR", "M" };
+
+            if (validPipNames.Any(x => !x.ContainsIgnoreCase(split[1])))
+            {
+                yield return $"sendtochaterror {split[1]} is invalid!";
+                yield break;
+            }
+
+            var pipIxes = new[] { 6, 7, 8, 9, 10, 11, 12, 13, 14 };
+
+            Buttons[pipIxes[Array.IndexOf(validPipNames, split[1])]].OnInteract();
+            yield return new WaitForSeconds(0.1f);
+
+            yield break;
+        }
+
+        if ("RESET".ContainsIgnoreCase(split[0]))
+        {
+            if (split.Length > 1)
+                yield break;
+
+            if (currentPhase != ModulePhase.Stamp)
+            {
+                yield return "sendtochaterror You cannot reset anymore!";
+                yield break;
+            }
+
+            Buttons[31].OnInteract();
+            yield return new WaitForSeconds(0.1f);
+            yield break;
+        }
+
+        if ("SUBMIT".ContainsIgnoreCase(split[0]))
+        {
+            if (split.Length > 1)
+                yield break;
+
+            if (currentPhase >= ModulePhase.Simon1)
+            {
+                yield return "sendtochaterror You cannot press the submit button anymore!";
+                yield break;
+            }
+
+            Buttons[32].OnInteract();
+            yield return new WaitForSeconds(0.1f);
+            yield break;
+        }
+
+        if (currentPhase >= ModulePhase.Simon1)
+        {
+            if (!split.All(x => x[0] == 'Q' && "1234".Contains(x[1]) && "TDLR".Contains(x[2])))
+            {
+                yield return "sendtochaterror Please try your input again.";
+                yield break;
+            }
+
+            if (split.Any(x => x.Length > 3))
+            {
+                yield return "sendtochaterror Please try your input again.";
+                yield break;
+            }
+
+            if (split.Length > 5)
+            {
+                yield return "sendtochaterror You cannot input more than 5 inputs!";
+                yield break;
+            }
+
+            var simonIxes = new[]
+            {
+                new[] { 15, 16, 17, 18 },
+                new[] { 19, 20, 21, 22 },
+                new[] { 23, 24, 25, 26 },
+                new[] { 27, 28, 29, 30 }
+            };
+
+            foreach (var cmd in split)
+            {
+                Buttons[simonIxes["1234".IndexOf(cmd[1])]["TDLR".IndexOf(cmd[2])]].OnInteract();
+                yield return new WaitForSeconds(0.1f);
+            }
+        }
+
     }
 
+    /* If anyone wants to implement the autosolver for this mod, be my guest. - Kilo
     IEnumerator TwitchHandleForcedSolve()
     {
         yield return null;
