@@ -281,7 +281,7 @@ public class UncoloredSimon : MonoBehaviour
             case ButtonNames.StampSpotDownRight:
             case ButtonNames.StampSpotDown:
                 if (currentPhase != ModulePhase.Stamp) return;
-                StampInGrid(index - 5);
+                StampInGrid(index - 6);
                 break;
             case ButtonNames.Q1Top:
             case ButtonNames.Q1Down:
@@ -385,65 +385,23 @@ public class UncoloredSimon : MonoBehaviour
 
     void StampInGrid(int pip)
     {
-        switch (pip)
+        int[,] gridRendPip = new int[9, 4]
         {
-            case 1:
-                gridRenderers[0].material = stampRenderers[0].sharedMaterial;
-                gridRenderers[2].material = stampRenderers[1].sharedMaterial;
-                gridRenderers[4].material = stampRenderers[2].sharedMaterial;
-                gridRenderers[1].material = stampRenderers[3].sharedMaterial;
-                break;
-            case 2:
-                gridRenderers[1].material = stampRenderers[0].sharedMaterial;
-                gridRenderers[4].material = stampRenderers[1].sharedMaterial;
-                gridRenderers[7].material = stampRenderers[2].sharedMaterial;
-                gridRenderers[3].material = stampRenderers[3].sharedMaterial;
-                break;
-            case 3:
-                gridRenderers[3].material = stampRenderers[0].sharedMaterial;
-                gridRenderers[7].material = stampRenderers[1].sharedMaterial;
-                gridRenderers[10].material = stampRenderers[2].sharedMaterial;
-                gridRenderers[6].material = stampRenderers[3].sharedMaterial;
-                break;
-            case 4:
-                gridRenderers[7].material = stampRenderers[0].sharedMaterial;
-                gridRenderers[11].material = stampRenderers[1].sharedMaterial;
-                gridRenderers[13].material = stampRenderers[2].sharedMaterial;
-                gridRenderers[10].material = stampRenderers[3].sharedMaterial;
-                break;
-            case 5:
-                gridRenderers[11].material = stampRenderers[0].sharedMaterial;
-                gridRenderers[14].material = stampRenderers[1].sharedMaterial;
-                gridRenderers[15].material = stampRenderers[2].sharedMaterial;
-                gridRenderers[13].material = stampRenderers[3].sharedMaterial;
-                break;
-            case 6:
-                gridRenderers[8].material = stampRenderers[0].sharedMaterial;
-                gridRenderers[12].material = stampRenderers[1].sharedMaterial;
-                gridRenderers[14].material = stampRenderers[2].sharedMaterial;
-                gridRenderers[11].material = stampRenderers[3].sharedMaterial;
-                break;
-            case 7:
-                gridRenderers[5].material = stampRenderers[0].sharedMaterial;
-                gridRenderers[9].material = stampRenderers[1].sharedMaterial;
-                gridRenderers[12].material = stampRenderers[2].sharedMaterial;
-                gridRenderers[8].material = stampRenderers[3].sharedMaterial;
-                break;
-            case 8:
-                gridRenderers[2].material = stampRenderers[0].sharedMaterial;
-                gridRenderers[5].material = stampRenderers[1].sharedMaterial;
-                gridRenderers[8].material = stampRenderers[2].sharedMaterial;
-                gridRenderers[4].material = stampRenderers[3].sharedMaterial;
-                break;
-            case 9:
-                gridRenderers[4].material = stampRenderers[0].sharedMaterial;
-                gridRenderers[8].material = stampRenderers[1].sharedMaterial;
-                gridRenderers[11].material = stampRenderers[2].sharedMaterial;
-                gridRenderers[7].material = stampRenderers[3].sharedMaterial;
-                break;
-        }
+            { 0, 2, 4, 1 },
+            { 1, 4, 7, 3 },
+            { 3, 7, 10, 6 },
+            { 7, 11, 13, 10 },
+            { 11, 14, 15, 13 },
+            { 8, 12, 14, 11 },
+            { 5, 9, 12, 8 },
+            { 2, 5, 8, 4 },
+            { 4, 8, 11, 7 }
+        };
 
-        ToggleColorblind(pip - 1, reset: false);
+        for (int i = 0; i < 4; i++)
+            gridRenderers[gridRendPip[pip, i]].material = stampRenderers[i].material;
+
+        ToggleColorblind(pip, reset: false);
     }
 
     void ToggleColorblind(int? pip = null, bool tpToggle = false, bool reset = false)
@@ -602,10 +560,11 @@ public class UncoloredSimon : MonoBehaviour
     #region Grid & Color Logic
     void GenerateGrayscale()
     {
-        Grayscale = new Material[0];
-        for (int i = 0; i < 4; i++)
-            Grayscale = Grayscale.Concat(Grays).ToArray();
-        Grayscale = Grayscale.Shuffle();
+        var rnd = new System.Random();
+        var result = Enumerable.Repeat(Grays, 3).SelectMany(x => x).ToList();
+        while (result.Count < 16)
+            result.Add(Grays[rnd.Next(Grays.Length)]);
+        Grayscale = result.Shuffle().ToArray();
     }
 
     void FillQuadrantsWithCurrentColor()
@@ -679,7 +638,7 @@ public class UncoloredSimon : MonoBehaviour
         foreach (int pip in stampOrder)
         {
             // Place the stamp at the pip location
-            PlaceStampInSimulatedGrid(pip, simulatedStamp, rotation);
+            PlaceStampInSimulatedGrid(pip - 1, simulatedStamp, rotation);
 
             // Determine rotation direction
             if (pip % 2 == 0)
@@ -706,75 +665,28 @@ public class UncoloredSimon : MonoBehaviour
     }
     void PlaceStampInSimulatedGrid(int pip, int[] simulatedStamp, int[] rotation)
     {
+        int[,] pipToSimGridMap = new int[9, 4]
+        {
+            { 0, 2, 4, 1 },
+            { 1, 4, 7, 3 },
+            { 3, 7, 10, 6 },
+            { 7, 11, 13, 10 },
+            { 11, 14, 15, 13 },
+            { 8, 12, 14, 11 },
+            { 5, 9, 12, 8 },
+            { 2, 5, 8, 4 },
+            { 4, 8, 11, 7 }
+        };
+
         int top = simulatedStamp[rotation[0]];
         int right = simulatedStamp[rotation[1]];
         int bottom = simulatedStamp[rotation[2]];
         int left = simulatedStamp[rotation[3]];
 
-        switch (pip)
-        {
-            case 1:
-                AssignGrid(0, top);
-                AssignGrid(2, right);
-                AssignGrid(4, bottom);
-                AssignGrid(1, left);
-                break;
-            case 2:
-                AssignGrid(1, top);
-                AssignGrid(4, right);
-                AssignGrid(7, bottom);
-                AssignGrid(3, left);
-                break;
-            case 3:
-                AssignGrid(3, top);
-                AssignGrid(7, right);
-                AssignGrid(10, bottom);
-                AssignGrid(6, left);
-                break;
-            case 4:
-                AssignGrid(7, top);
-                AssignGrid(11, right);
-                AssignGrid(13, bottom);
-                AssignGrid(10, left);
-                break;
-            case 5:
-                AssignGrid(11, top);
-                AssignGrid(14, right);
-                AssignGrid(15, bottom);
-                AssignGrid(13, left);
-                break;
-            case 6:
-                AssignGrid(8, top);
-                AssignGrid(12, right);
-                AssignGrid(14, bottom);
-                AssignGrid(11, left);
-                break;
-            case 7:
-                AssignGrid(5, top);
-                AssignGrid(9, right);
-                AssignGrid(12, bottom);
-                AssignGrid(8, left);
-                break;
-            case 8:
-                AssignGrid(2, top);
-                AssignGrid(5, right);
-                AssignGrid(8, bottom);
-                AssignGrid(4, left);
-                break;
-            case 9:
-                AssignGrid(4, top);
-                AssignGrid(8, right);
-                AssignGrid(11, bottom);
-                AssignGrid(7, left);
-                break;
-        }
-    }
-    void AssignGrid(int gridIndex, int colorIndex)
-    {
-        if (ColoredGrid[gridIndex] == null)
-            ColoredGrid[gridIndex] = unlitColors[colorIndex];
-        else
-            ColoredGrid[gridIndex] = unlitColors[colorIndex];
+        int[] direction = {top, right, bottom, left};
+
+        for (int i = 0; i < 4; i++)
+            ColoredGrid[pipToSimGridMap[pip, i]] = unlitColors[direction[i]];
     }
     void GridToUnlit()
     {
@@ -1193,6 +1105,7 @@ public class UncoloredSimon : MonoBehaviour
                     yield return new WaitForSeconds(0.1f);
                 }
             Buttons[(int)ButtonNames.Submit].OnInteract();
+            yield return new WaitForSeconds(0.2f);
         }
 
         while (stampOrder.Count == 0)
