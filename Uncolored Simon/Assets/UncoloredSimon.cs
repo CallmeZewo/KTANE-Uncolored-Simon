@@ -877,7 +877,7 @@ public class UncoloredSimon : MonoBehaviour
 
     #region Twitch Plays
 #pragma warning disable 414
-    private readonly string TwitchHelpMessage = @"!{0} cb/colorblind toggles colorblind support || stamp set blue brown magenta cyan sets the colors clockwises starting from the top || stamp rotate cw/ccw rotates the stamp in that direction || pip t/tl/l/dl/dl/dr/r/tr/m presses the pip to set the colors from the stamp || reset to reset grid || submit to submit either the stamp or the grid || q1t q2d q3r q4l to press the buttons in that quadrant and position respectively.";
+    private readonly string TwitchHelpMessage = @"!{0} cb/colorblind toggles colorblind support || stamp set blue brown magenta cyan sets the colors clockwises starting from the top || stamp rotate cw/ccw rotates the stamp in that direction || pip t/tl/l/dl/d/dr/r/tr/m presses the pip to set the colors from the stamp || reset to reset grid || submit to submit either the stamp or the grid || q1t q2d q3r q4l to press the buttons in that quadrant and position respectively, quadrants are numbered starting from the top and proceeding clockwise: N,E,S,W.";
 #pragma warning restore 414
 
     IEnumerator ProcessTwitchCommand(string command)
